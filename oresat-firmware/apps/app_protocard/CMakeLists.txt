@@ -9,14 +9,17 @@ list(APPEND BOARD_ROOT ${ORESAT_FIRMWARE_ROOT}/)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(app_protocard)
 
-target_compile_options(
-  app PRIVATE 
-  -Wall 
-  -Wextra 
-  #  -Wundef 
-  -Wstrict-prototypes
+target_compile_options(app 
+  PRIVATE 
+    -Wall 
+    -Wextra 
+    #  -Wundef 
+    -Wstrict-prototypes
 )
 
+target_sources(app 
+  PRIVATE 
+    main.c
+    src/protocard.c
+)
 target_include_directories(app PRIVATE include/)
-target_sources(app PRIVATE main.c)
-target_sources(app PRIVATE src/protocard.c)
