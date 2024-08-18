@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "blinky.h"
+#include "protocard.h"
 
 int main(void)
 {
-
   startThreads();
   
   while(1)

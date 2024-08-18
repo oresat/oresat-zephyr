@@ -1,4 +1,4 @@
-#include "blinky.h"
+#include "protocard.h"
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 int blinky(void)
@@ -35,7 +35,7 @@ int blinky(void)
 
 }
 
-extern void blinky_entry(void *unused0, void *unused1, void *unused2)
+void blinky_entry(void *unused0, void *unused1, void *unused2)
 {
   (void) unused0;
   (void) unused1;

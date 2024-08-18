@@ -1,5 +1,5 @@
-#ifndef BLINKY_H
-#define BLINKY_H
+#ifndef PROTOCARD_H
+#define PROTOCARD_H
 
 #include <stdio.h>
 #include <zephyr/kernel.h>
@@ -15,7 +15,6 @@
 
 extern void blinky_entry(void *, void *, void *);
 extern int startThreads(void);
-extern int can_main(void);
 
 /*
 k_tid_t blinky_tid = k_thread_create(
@@ -26,5 +25,6 @@ k_tid_t blinky_tid = k_thread_create(
 );
 //*/
 
-#endif // BLINKY_H
+#endif // PROTOCARD_H
+
 
