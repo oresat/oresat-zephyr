@@ -1,6 +1,11 @@
-# Python virtual environment
-.venv
+# zephyr
+zephyr/
+bootloader/
+modules/
+tools/
 
+# Python virtual environment
+.venv/
 
 # vim swap files
 *.swp
