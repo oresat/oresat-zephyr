@@ -1,3 +1,11 @@
+# Python virtual environment
+.venv
+
+
+# vim swap files
+*.swp
+*.swo
+
 # Prerequisites
 *.d
 
