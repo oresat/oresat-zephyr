@@ -22,4 +22,4 @@ target_sources(app
     main.c
     src/protocard.c
 )
-target_include_directories(app PRIVATE include/)
+target_include_directories(app PRIVATE src/include/)
