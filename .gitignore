@@ -1,3 +1,6 @@
+# west workspace
+workspace
+
 # Python virtual environment
 .venv/
 

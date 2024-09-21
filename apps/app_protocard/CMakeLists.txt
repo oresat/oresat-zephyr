@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
-set(ORESAT_FIRMWARE_ROOT "$ENV{ZEPHYR_BASE}/../oresat-firmware")
+set(ORESAT_FIRMWARE_ROOT "$ENV{ZEPHYR_BASE}/../..")
 
 list(APPEND BOARD_ROOT ${ORESAT_FIRMWARE_ROOT}/)
 
