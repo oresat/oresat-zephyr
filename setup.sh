@@ -16,7 +16,9 @@ west update
 west zephyr-export
 pip install -r ./zephyr/scripts/requirements.txt
 
-export ZEPHYR_BASE=$(pwd)/zephyr
 echo "export ZEPHYR_BASE=$(pwd)/zephyr" >> ~/.bashrc
-echo "ZEPHYR_BASE=${ZEPHYR_BASE} appended to ~/.bashrc"
-echo "run source .venv/bin/activate to start virtual environment"
+
+echo -e "\nFinal setup: "
+echo -e "ZEPHYR_BASE=${ZEPHYR_BASE} appended to ~/.bashrc"
+echo    "run \"source ~/.barshrc\" to export ZEPHYR_BASE"
+echo    "run \"source .venv/bin/activate\" to start virtual environment"
