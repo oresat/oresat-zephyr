@@ -1,9 +1,3 @@
-# zephyr
-zephyr/
-bootloader/
-modules/
-tools/
-
 # Python virtual environment
 .venv/
 
