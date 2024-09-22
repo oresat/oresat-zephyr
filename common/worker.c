@@ -5,7 +5,7 @@
 #define WRK_EVT_TERMINATE   EVENT_MASK(1)
 #define WRK_EVT_NMT         EVENT_MASK(2)
 
-#ifndef (CO_NMT_OPERATIONAL)
+#ifndef CO_NMT_OPERATIONAL
 #define CO_NMT_OPERATIONAL 1 // temporary so it will compile
 #endif
 
