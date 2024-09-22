@@ -23,7 +23,6 @@ typedef struct worker {
 
 #define THREAD_MGR_WA_SIZE 0x100
 #define THREAD_MGR_PRIORITY 1
-#define CO_NMT_OPERATIONAL 1 // temporary so it will compile
 
 void thread_mgr(void *, void *, void *);
 
