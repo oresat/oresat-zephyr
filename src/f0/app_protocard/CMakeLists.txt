@@ -20,6 +20,6 @@ target_compile_options(app
 target_sources(app 
   PRIVATE 
     main.c
-    src/protocard.c
+    src/blinky.c
 )
 target_include_directories(app PRIVATE src/include/)

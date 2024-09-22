@@ -1,5 +1,5 @@
-#ifndef PROTOCARD_H
-#define PROTOCARD_H
+#ifndef BLINKY_H
+#define BLINKY_H
 
 #include <stdio.h>
 #include <zephyr/kernel.h>
@@ -14,7 +14,7 @@
 #define LED0_NODE DT_ALIAS(led0)
 
 extern void blinky_entry(void *, void *, void *);
-extern int startThreads(void);
+extern int startBlinkyThread(void);
 
 /*
 k_tid_t blinky_tid = k_thread_create(
@@ -25,6 +25,6 @@ k_tid_t blinky_tid = k_thread_create(
 );
 //*/
 
-#endif // PROTOCARD_H
+#endif // BLINKY_H
 
 
