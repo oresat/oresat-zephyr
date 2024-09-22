@@ -1,10 +1,14 @@
 #ifndef _ORESAT_H_
 #define _ORESAT_H_
 
-#include "ch.h"
-#include "hal.h"
+
+#include <zephyr/kernel.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/sys/reboot.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include "worker.h"
-#include "can_hw.h"
+//#include "can_hw.h"
 
 #define CO_USE_GLOBALS
 #define CO_DRIVER_CUSTOM
@@ -16,16 +20,16 @@ extern "C" {
 #endif
 
 typedef struct {
-    CANDriver *cand;
+//    CANDriver *cand;
     uint8_t node_id;
     uint16_t bitrate;
-    const flt_reg_t *fifo1_filters;
+//    const flt_reg_t *fifo1_filters;
     size_t filter_count;
 } oresat_config_t;
 
 /* OreSat initialization and main process */
-void oresat_init(oresat_config_t *config);
-void oresat_start(void);
+int oresat_init(oresat_config_t *config);
+int oresat_start(void);
 
 #ifdef __cplusplus
 }
