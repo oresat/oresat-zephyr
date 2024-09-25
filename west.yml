@@ -1,0 +1,11 @@
+# TODO: Implement custom west manifest
+# 
+# Future implementation steps:
+# 1. Define project structure, including any custom modules or libraries (i.e. CANopenNode)
+# 2. Specify the Zephyr version we want to use
+# 3. Add any additional repositories our project depends on
+# 4. Configure any project-specific settings or overrides
+#
+# To reinitialize the west workspace when this manifest is implemented
+
+
