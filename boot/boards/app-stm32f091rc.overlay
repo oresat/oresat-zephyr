@@ -1,6 +1,6 @@
 / {
     chosen {
-        ephyr,code-partition = &boot_partition;
+        zephyr,code-partition = &slot0_partition;
     };
 };
 
