@@ -59,7 +59,7 @@ pip install west
 ### Get the source code
 
 ```bash
-west init -m https://github.com/oresat/oresat-zephyr -mr master zephyr-workspace
+west init -m https://github.com/oresat/oresat-zephyr --mr master zephyr-workspace
 cd zephyr-workspace
 west update
 ```
