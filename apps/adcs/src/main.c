@@ -6,6 +6,7 @@
 #include <zephyr/sys/reboot.h>
 #include <canopennode.h>
 #include <OD.h>
+#include "board_sensors.h"
 
 #define CAN_INTERFACE DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus))
 #define CAN_BITRATE (DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bitrate, \
@@ -23,6 +24,8 @@ int main(void) {
 	bool gyro_ok = false;
 
 	canopennode_init(CAN_INTERFACE, CAN_BITRATE, 0x38);
+
+	board_sensors_init();
 
 	if (!device_is_ready(dev_gyro)) {
 		printf("Device %s is not ready\n", dev_gyro->name);
@@ -63,6 +66,8 @@ int main(void) {
 		k_sleep(K_MSEC(1000));
 
 		gpio_pin_toggle_dt(&led);
+
+		board_sensors_fill_od();
 
 		if (gyro_ok) {
 			sensor_sample_fetch(dev_gyro);

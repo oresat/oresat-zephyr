@@ -1,5 +1,5 @@
-zephyr_syscall_include_directories(modules)
+zephyr_syscall_include_directories(common)
 
-zephyr_include_directories(modules)
+zephyr_include_directories(common)
 
-add_subdirectory(modules)
+add_subdirectory(common)

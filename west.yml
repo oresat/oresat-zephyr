@@ -13,4 +13,4 @@ manifest:
     - name: CANopenNode
       url: https://github.com/CANopenNode/CANopenNode
       revision: 58012aa
-      path: oresat-zephyr/modules/canopennode_v4/CANopenNode
+      path: oresat-zephyr/common/canopennode_v4/CANopenNode

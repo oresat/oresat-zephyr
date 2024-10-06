@@ -1,6 +1,7 @@
 # editors
 .vscode
 *.swp
+*.cache
 
 # mac
 .DS_Store
