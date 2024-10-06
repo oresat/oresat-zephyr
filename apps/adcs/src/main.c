@@ -7,6 +7,7 @@
 #include <canopennode.h>
 #include <OD.h>
 #include "board_sensors.h"
+#include "oresat.h"
 
 #define CAN_INTERFACE DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus))
 #define CAN_BITRATE (DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bitrate, \
@@ -22,8 +23,9 @@ int main(void) {
 	struct sensor_value sampling_freq;
 	struct sensor_value oversampling;
 	bool gyro_ok = false;
+	uint8_t node_id = get_node_id();
 
-	canopennode_init(CAN_INTERFACE, CAN_BITRATE, 0x38);
+	canopennode_init(CAN_INTERFACE, CAN_BITRATE, node_id);
 
 	board_sensors_init();
 
