@@ -1,52 +1,19 @@
-# Prerequisites
-*.d
+# editors
+.vscode
+*.swp
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+# mac
+.DS_Store
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# python
+.venv
+__pycache__/
 
-# Precompiled Headers
-*.gch
-*.pch
+# builds
+build/
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+# generated files
+gen/
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# modules
+CANopenNode

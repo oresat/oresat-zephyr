@@ -1,0 +1,16 @@
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: b6aed5c
+      import:
+        name-allowlist:
+          - cmsis
+          - hal_stm32
+    - name: CANopenNode
+      url: https://github.com/CANopenNode/CANopenNode
+      revision: 58012aa
+      path: oresat-zephyr/modules/canopennode_v4/CANopenNode
