@@ -1,5 +1,5 @@
 sample:
-  name: oresat-adcs
+  name: oresat-diode-test
 common:
   tags:
     - can
