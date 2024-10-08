@@ -28,15 +28,3 @@
 		/* storage_partition 6K defined in nucleo_f091rc.dts */
 	};
 };
-
-&i2c1 {
-	status = "okay";
-
-	bmi08x-gryo@18 {
-		status = "okay";
-		compatible = "bosch,bmi08x-gyro";
-		reg = <0x18>;
-		gyro-hz = "1000_116";
-		gyro-fs = <1000>;
-	};
-};
