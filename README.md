@@ -13,7 +13,7 @@ OreSat firmware projects using Zephyr RTOS.
     ```bash
     paru -S git cmake ninja gperf dtc wget \
       python python-dev python-pip python-setuptools python-wheel \
-      xz file make gcc sdl2 openocd
+      xz file make gcc sdl2 openocd stlink
     ```
 
 - Debian Linux
@@ -22,7 +22,8 @@ OreSat firmware projects using Zephyr RTOS.
     sudo apt install --no-install-recommends git cmake ninja-build gperf \
       ccache dfu-util device-tree-compiler wget \
       python3-dev python3-pip python3-setuptools python3-tk python3-wheel \
-      xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 openocd
+      xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
+      openocd stlink-tools
     ```
 
 ### Install Zephyr SDK
