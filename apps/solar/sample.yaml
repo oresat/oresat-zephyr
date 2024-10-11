@@ -1,0 +1,10 @@
+sample:
+  name: oresat-solar
+common:
+  tags:
+    - can
+    - canopen
+  modules:
+    - canopennode
+  integration_platforms:
+    - nucleo_f091rc

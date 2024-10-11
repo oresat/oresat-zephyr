@@ -1,0 +1,10 @@
+sample:
+  name: oresat-reaction-wheel
+common:
+  tags:
+    - can
+    - canopen
+  modules:
+    - canopennode
+  integration_platforms:
+    - nucleo_g474re
