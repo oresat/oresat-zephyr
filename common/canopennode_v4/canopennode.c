@@ -6,8 +6,10 @@
 #include <OD.h>
 #include <canopennode.h>
 
+#define CO_SDO_SERVER_STACK_SIZE 2048
 #define CO_MAIN_STACK_SIZE 2048
-#define CO_RT_STACK_SIZE 2048
+#define CO_RT_STACK_SIZE 512
+#define CO_SDO_SERVER_PRIORITY 5
 #define CO_MAIN_PRIORITY 5
 #define CO_RT_PRIORITY 5
 
@@ -23,13 +25,20 @@
 CO_t *CO = NULL;
 static CO_NMT_reset_cmd_t reset = CO_RESET_NOT;
 
+static void co_timer_hadler(struct k_timer *timer);
+K_TIMER_DEFINE(co_timer, co_timer_hadler, NULL);
+
+K_THREAD_STACK_DEFINE(co_sdo_server_stack_area, CO_SDO_SERVER_STACK_SIZE);
 K_THREAD_STACK_DEFINE(co_main_stack_area, CO_MAIN_STACK_SIZE);
 K_THREAD_STACK_DEFINE(co_rt_stack_area, CO_RT_STACK_SIZE);
+struct k_thread co_sdo_server_thread_data;
 struct k_thread co_main_thread_data;
 struct k_thread co_rt_thread_data;
+k_tid_t co_sdo_server_tid;
 k_tid_t co_main_tid;
 k_tid_t co_rt_tid;
 
+static void co_sdo_server_thread(void *p1, void *p2, void *p3);
 static void co_main_thread(void *p1, void *p2, void *p3);
 static void co_rt_thread(void *p1, void *p2, void *p3);
 
@@ -64,7 +73,7 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 		}
 		OD_get_u32(entry, 1, &cob_id, true);
 		if (cob_id ==  0x180U + (0x100U * (i % 4))) {
-			OD_set_u32(entry, 1, cob_id + node_id, true);
+			OD_set_u32(entry, 1, cob_id + node_id + (i / 4), true);
 		}
 	}
 #endif
@@ -76,7 +85,7 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 		}
 		OD_get_u32(entry, 1, &cob_id, true);
 		if (cob_id ==  0x180U + (0x100U * (i % 4))) {
-			OD_set_u32(entry, 1, cob_id + node_id, true);
+			OD_set_u32(entry, 1, cob_id + node_id + (i / 4), true);
 		}
 	}
 #endif
@@ -141,6 +150,11 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 	CO_CANsetNormalMode(CO->CANmodule);
 
 	/* start threads */
+	co_sdo_server_tid = k_thread_create(&co_sdo_server_thread_data, co_sdo_server_stack_area,
+					K_THREAD_STACK_SIZEOF(co_sdo_server_stack_area),
+					co_sdo_server_thread,
+					NULL, NULL, NULL,
+					CO_SDO_SERVER_PRIORITY, 0, K_NO_WAIT);
 	co_main_tid = k_thread_create(&co_main_thread_data, co_main_stack_area,
 					K_THREAD_STACK_SIZEOF(co_main_stack_area),
 					co_main_thread,
@@ -151,6 +165,8 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 					co_rt_thread,
 					NULL, NULL, NULL,
 					CO_RT_PRIORITY, 0, K_NO_WAIT);
+
+	k_timer_start(&co_timer, K_NO_WAIT, K_MSEC(1));
 
 	return 0;
 }
@@ -172,55 +188,77 @@ void canopennode_stop(const struct device *dev) {
 	printf("CANopenNode finished\n");
 }
 
-static void co_main_thread(void *p1, void *p2, void *p3) {
-	(void)p1;
-	(void)p2;
-	(void)p3;
-	reset = CO_RESET_NOT;
+static void process_cb(void *tid) {
+	k_thread_resume(*((k_tid_t *)tid));
+}
 
+static void co_sdo_server_thread(void *p1, void *p2, void *p3) {
+	ARG_UNUSED(p1);
+	ARG_UNUSED(p2);
+	ARG_UNUSED(p3);
+	CO_SDOserver_t *SDOserver = &CO->SDOserver[0];
+	uint64_t timestamp;
+	uint32_t elapsed_us = -1;
+	k_tid_t tid = k_current_get();
+
+	/* Register the callback function to wake up thread when message received */
+	CO_SDOserver_initCallbackPre(SDOserver, (void *)&tid, process_cb);
+
+	while (reset == CO_RESET_NOT) {
+		timestamp = k_uptime_get();
+		CO_SDOserver_process(SDOserver, true, elapsed_us, NULL);
+		k_sleep(K_FOREVER);
+		elapsed_us = (uint32_t)k_uptime_delta(&timestamp) * 1000;
+	}
+
+	CO_SDOserver_initCallbackPre(SDOserver, NULL, NULL);
+}
+
+static void co_main_thread(void *p1, void *p2, void *p3) {
+	ARG_UNUSED(p1);
+	ARG_UNUSED(p2);
+	ARG_UNUSED(p3);
+	uint32_t elapsed_us = 1000U;
+
+	reset = CO_RESET_NOT;
 	printf("CANopenNode - Running...\n");
 
-	int64_t timestamp;
-	uint32_t time_diff_us = 0U;
-	uint32_t time_next_us = 1000U;
 	while (reset == CO_RESET_NOT) {
-		time_next_us = 1000U;
-		timestamp = k_uptime_get();
-		reset = CO_process(CO, false, time_diff_us, &time_next_us);
-		if (time_next_us > 0) {
-			k_sleep(K_MSEC(time_next_us / 1000));
-			time_diff_us = (uint32_t)k_uptime_delta(&timestamp) * 1000;
-		} else {
-			// do not sleep, more processing to be done by the stack
-			time_diff_us = 0;
-		}
+		k_sleep(K_FOREVER);
+		reset = CO_process(CO, false, elapsed_us, NULL);
 	}
 }
 
 /* timer thread executes in constant intervals */
 static void co_rt_thread(void *p1, void *p2, void *p3) {
-	(void)p1;
-	(void)p2;
-	(void)p3;
-	uint32_t elapsed = 1000; /* microseconds */
+	ARG_UNUSED(p1);
+	ARG_UNUSED(p2);
+	ARG_UNUSED(p3);
+	uint32_t elapsed_us = 1000U;
 	bool syncWas;
 
 	while (reset == CO_RESET_NOT) {
+		k_sleep(K_FOREVER);
 		syncWas = false;
 
 		CO_LOCK_OD(CO->CANmodule);
 		if (!CO->nodeIdUnconfigured && CO->CANmodule->CANnormal) {
 #if (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE
-			syncWas = CO_process_SYNC(CO, elapsed, NULL);
+			syncWas = CO_process_SYNC(CO, elapsed_us, NULL);
 #endif
 #if (CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE
-			CO_process_RPDO(CO, syncWas, elapsed, NULL);
+			CO_process_RPDO(CO, syncWas, elapsed_us, NULL);
 #endif
 #if (CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE
-			CO_process_TPDO(CO, syncWas, elapsed, NULL);
+			CO_process_TPDO(CO, syncWas, elapsed_us, NULL);
 #endif
 		}
 		CO_UNLOCK_OD(CO->CANmodule);
-		k_sleep(K_MSEC(1));
 	}
+}
+
+void co_timer_hadler(struct k_timer *timer) {
+	ARG_UNUSED(timer);
+	k_thread_resume(co_main_tid);
+	k_thread_resume(co_rt_tid);
 }

@@ -21,6 +21,7 @@ extern "C" {
 #include <zephyr/kernel.h>
 #include <zephyr/types.h>
 #include <zephyr/device.h>
+#include <zephyr/drivers/can.h>
 #include <zephyr/toolchain.h>
 #include <zephyr/dsp/types.h> /* float32_t, float64_t */
 #include <CO_driver_custom.h>
@@ -57,9 +58,6 @@ typedef struct canopen_rx_msg {
 	uint8_t DLC;
 } CO_CANrxMsg_t;
 
-typedef void (*CO_CANrxBufferCallback_t)(void *object,
-					 const CO_CANrxMsg_t *message);
-
 /* Stack configuration override default values. For more information see file CO_config.h. */
 
 /* Basic definitions. If big endian, CO_SWAP_xx macros must swap bytes. */
@@ -68,9 +66,16 @@ typedef void (*CO_CANrxBufferCallback_t)(void *object,
 #define CO_SWAP_32(x) x
 #define CO_SWAP_64(x) x
 
-/* Access to received CAN message */
-#define CO_CANrxMsg_readDLC(msg)   ((uint8_t)0)
-#define CO_CANrxMsg_readData(msg)  ((const uint8_t*)NULL)
+static inline uint16_t CO_CANrxMsg_readIdent(void *rxMsg) {
+	return ((struct can_frame *)rxMsg)->id;
+}
+
+static inline uint16_t CO_CANrxMsg_readDLC(void *rxMsg) {
+	return ((struct can_frame *)rxMsg)->dlc;
+}
+static inline const uint8_t* CO_CANrxMsg_readData(void* rxMsg) {
+	return ((struct can_frame *)rxMsg)->data;
+}
 
 /* Received message object */
 typedef struct {

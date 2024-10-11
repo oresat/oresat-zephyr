@@ -9,9 +9,20 @@
 #include <zephyr/init.h>
 #include <zephyr/sys/util.h>
 
-#include <CANopen.h>
+#include "CANopen.h"
+#include <OD.h>
 #include <CO_driver_target.h>
 #include <canopennode.h>
+
+#define OD_CNT_RX_MSG (OD_CNT_NMT + OD_CNT_SYNC + OD_CNT_SDO_SRV)
+
+struct can_filter_user_data {
+	void *object; // a CANopenNode object (first arg to func)
+	void (*func)(void*, void*); // object, can_Frame
+};
+
+static struct can_filter filters[OD_CNT_RX_MSG];
+static struct can_filter_user_data filters_user_data[OD_CNT_RX_MSG];
 
 K_KERNEL_STACK_DEFINE(canopen_tx_workq_stack, CONFIG_CANOPENNODE_TX_WORKQUEUE_STACK_SIZE);
 
@@ -172,15 +183,10 @@ CO_ReturnError_t CO_CANmodule_init(CO_CANmodule_t *CANmodule,
 		if (max_filters < 0) {
 			printf("unable to determine number of CAN RX filters");
 			return CO_ERROR_SYSCALL;
-		}
-
-		if (rxSize > max_filters) {
+		} else if (rxSize > max_filters) {
 			printf("insufficient number of concurrent CAN RX filters"
 				" (needs %d, %d available)\n", rxSize, max_filters);
 			return CO_ERROR_OUT_OF_MEMORY;
-		} else if (rxSize < max_filters) {
-			printf("excessive number of concurrent CAN RX filters enabled"
-				" (needs %d, %d available)\n", rxSize, max_filters);
 		}
 	}
 
@@ -249,17 +255,20 @@ void CO_CANmodule_disable(CO_CANmodule_t *CANmodule)
 	}
 }
 
-uint16_t CO_CANrxMsg_readIdent(const CO_CANrxMsg_t *rxMsg)
-{
-	return rxMsg->ident;
+static void rx_callback(const struct device *dev, struct can_frame *frame, void *user_data) {
+	if (user_data) {
+		struct can_filter_user_data *filter_user_data = (struct can_filter_user_data *)user_data;
+		filter_user_data->func(filter_user_data->object, (void *)frame);
+	}
 }
 
 CO_ReturnError_t CO_CANrxBufferInit(CO_CANmodule_t *CANmodule, uint16_t index,
 				uint16_t ident, uint16_t mask, bool_t rtr,
 				void *object,
 				void (*CANrx_callback)(void* object, void* message)) {
+
 	CO_ReturnError_t ret = CO_ERROR_NO;
-	if ((CANmodule != NULL) && (object != NULL) && (CANrx_callback != NULL) && (index < CANmodule->rxSize)) {
+	if ((CANmodule != NULL) && (object != NULL) && (CANrx_callback != NULL) && (index < OD_CNT_RX_MSG)) {
 		/* buffer, which will be configured */
 		CO_CANrx_t* buffer = &CANmodule->rxArray[index];
 
@@ -276,7 +285,15 @@ CO_ReturnError_t CO_CANrxBufferInit(CO_CANmodule_t *CANmodule, uint16_t index,
 		buffer->mask = (mask & 0x07FFU) | 0x0800U;
 
 		/* Set CAN hardware module filter and mask. */
-		if (CANmodule->useCANrxFilters) {}
+		if (CANmodule->useCANrxFilters) {
+			filters[index].mask = mask;
+			filters[index].id = ident;
+			filters[index].flags = 0;
+			filters_user_data[index].func = CANrx_callback;
+			filters_user_data[index].object = object;
+			can_add_rx_filter(CANmodule->CANptr, rx_callback,
+					(void *)&filters_user_data[index], &filters[index]);
+		}
 	} else {
 		printf("failed to initialize CAN rx buffer, illegal argument");
 		ret = CO_ERROR_ILLEGAL_ARGUMENT;

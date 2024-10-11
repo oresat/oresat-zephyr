@@ -41,11 +41,6 @@ void board_sensors_fill_od(void) {
 	sensor_sample_fetch(devs_die_temp[0]);
 	sensor_channel_get(devs_die_temp[0], SENSOR_CHAN_DIE_TEMP, &die_temp);
 
-	printf("vref %d.%dv | vbat %d.%dv | temp %d.%dC\n",
-			vref.val1, vref.val2,
-			vbat.val1, vbat.val2,
-			die_temp.val1, die_temp.val2);
-
 	CO_LOCK_OD(CO->CANmodule);
 	OD_RAM.x3003_system.vrefint = vref.val1; // truncating 3.3v into 3v
 	// no vbat entry ?
