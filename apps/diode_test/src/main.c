@@ -1,8 +1,5 @@
-#include <stdio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
-#include <zephyr/drivers/sensor.h>
-#include <zephyr/drivers/gpio.h>
 #include <zephyr/sys/reboot.h>
 #include <canopennode.h>
 #include <OD.h>
@@ -15,17 +12,20 @@
 						     CONFIG_CAN_DEFAULT_BITRATE)) / 1000)
 
 int main(void) {
+	k_timepoint_t timepoint;
 	uint8_t node_id = get_node_id();
+
 	canopennode_init(CAN_INTERFACE, CAN_BITRATE, node_id);
 	board_sensors_init();
 
-
 	while (canopennode_is_running()) {
-		k_sleep(K_MSEC(1000));
+		timepoint = sys_timepoint_calc(K_MSEC(1000));
 		board_sensors_fill_od();
+		k_sleep(sys_timepoint_timeout(timepoint));
 	}
 
 	canopennode_stop(CAN_INTERFACE);
 	sys_reboot(SYS_REBOOT_COLD);
+
 	return 0;
 }

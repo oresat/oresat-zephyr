@@ -9,6 +9,7 @@ execute_process(COMMAND bash -c "oresat-configs fw-files ${CARD} -d gen")
 
 target_sources(app PRIVATE
   src/main.c
+  src/imu.c
   gen/OD.c
 )
 
