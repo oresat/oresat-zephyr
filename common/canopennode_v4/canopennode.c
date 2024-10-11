@@ -53,6 +53,34 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 		printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
 	}
 
+	/* add node_id to sdo cob ids */
+	uint32_t cob_id;
+	OD_entry_t *entry;
+#if OD_CNT_RPDO > 0
+	for (int i = 0; i <` OD_CNT_RPDO; i++) {
+		entry = OD_find(OD, 0x1400 + i);
+		if (!entry) {
+			continue;
+		}
+		OD_get_u32(entry, 1, &cob_id, true);
+		if (cob_id ==  0x180U + (0x100U * (i % 4))) {
+			OD_set_u32(entry, 1, cob_id + node_id, true);
+		}
+	}
+#endif
+#if OD_CNT_TPDO > 0
+	for (int i = 0; i < OD_CNT_TPDO; i++) {
+		entry = OD_find(OD, 0x1800 + i);
+		if (!entry) {
+			continue;
+		}
+		OD_get_u32(entry, 1, &cob_id, true);
+		if (cob_id ==  0x180U + (0x100U * (i % 4))) {
+			OD_set_u32(entry, 1, cob_id + node_id, true);
+		}
+	}
+#endif
+
 	/* CANopen communication reset - initialize CANopen objects */
 	printf("CANopenNode - Reset communication...\n");
 
@@ -70,17 +98,18 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 		return -1;
 	}
 
-	err = CO_CANopenInit(CO,                   /* CANopen object */
-											 NULL,                 /* alternate NMT */
-											 NULL,                 /* alternate em */
-											 OD,                   /* Object dictionary */
-											 OD_STATUS_BITS,       /* Optional OD_statusBits */
-											 NMT_CONTROL,          /* CO_NMT_control_t */
-											 FIRST_HB_TIME,        /* firstHBTime_ms */
-											 SDO_SRV_TIMEOUT_TIME, /* SDOserverTimeoutTime_ms */
-											 SDO_CLI_TIMEOUT_TIME, /* SDOclientTimeoutTime_ms */
-											 SDO_CLI_BLOCK,        /* SDOclientBlockTransfer */
-											 node_id, &errInfo);
+	err = CO_CANopenInit(
+		CO,			/* CANopen object */
+		NULL,			/* alternate NMT */
+		NULL,			/* alternate em */
+		OD,			/* Object dictionary */
+		OD_STATUS_BITS,		/* Optional OD_statusBits */
+		NMT_CONTROL,		/* CO_NMT_control_t */
+		FIRST_HB_TIME,		/* firstHBTime_ms */
+		SDO_SRV_TIMEOUT_TIME,	/* SDOserverTimeoutTime_ms */
+		SDO_CLI_TIMEOUT_TIME,	/* SDOclientTimeoutTime_ms */
+		SDO_CLI_BLOCK,		/* SDOclientBlockTransfer */
+		node_id, &errInfo);
 	if (err != CO_ERROR_NO && err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS) {
 		if (err == CO_ERROR_OD_PARAMETERS) {
 			printf("Object Dictionary entry 0x%X\n", errInfo);
@@ -113,15 +142,15 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 
 	/* start threads */
 	co_main_tid = k_thread_create(&co_main_thread_data, co_main_stack_area,
-																K_THREAD_STACK_SIZEOF(co_main_stack_area),
-																co_main_thread,
-																NULL, NULL, NULL,
-																CO_MAIN_PRIORITY, 0, K_NO_WAIT);
+					K_THREAD_STACK_SIZEOF(co_main_stack_area),
+					co_main_thread,
+					NULL, NULL, NULL,
+					CO_MAIN_PRIORITY, 0, K_NO_WAIT);
 	co_rt_tid = k_thread_create(&co_rt_thread_data, co_rt_stack_area,
-															K_THREAD_STACK_SIZEOF(co_rt_stack_area),
-															co_rt_thread,
-															NULL, NULL, NULL,
-															CO_RT_PRIORITY, 0, K_NO_WAIT);
+					K_THREAD_STACK_SIZEOF(co_rt_stack_area),
+					co_rt_thread,
+					NULL, NULL, NULL,
+					CO_RT_PRIORITY, 0, K_NO_WAIT);
 
 	return 0;
 }
@@ -173,26 +202,25 @@ static void co_rt_thread(void *p1, void *p2, void *p3) {
 	(void)p1;
 	(void)p2;
 	(void)p3;
+	uint32_t elapsed = 1000; /* microseconds */
+	bool syncWas;
 
 	while (reset == CO_RESET_NOT) {
-		k_sleep(K_MSEC(1));
+		syncWas = false;
 
 		CO_LOCK_OD(CO->CANmodule);
 		if (!CO->nodeIdUnconfigured && CO->CANmodule->CANnormal) {
-			bool syncWas = false;
-			/* get time difference since last function call */
-			uint32_t timeDifference_us = 1000;
-
 #if (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE
-			syncWas = CO_process_SYNC(CO, timeDifference_us, NULL);
+			syncWas = CO_process_SYNC(CO, elapsed, NULL);
 #endif
 #if (CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE
-			CO_process_RPDO(CO, syncWas, timeDifference_us, NULL);
+			CO_process_RPDO(CO, syncWas, elapsed, NULL);
 #endif
 #if (CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE
-			CO_process_TPDO(CO, syncWas, timeDifference_us, NULL);
+			CO_process_TPDO(CO, syncWas, elapsed, NULL);
 #endif
 		}
 		CO_UNLOCK_OD(CO->CANmodule);
+		k_sleep(K_MSEC(1));
 	}
 }

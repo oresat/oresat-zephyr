@@ -10,7 +10,7 @@
 #include <zephyr/sys/util.h>
 
 #include <CANopen.h>
-#include <CO_driver.h>
+#include <CO_driver_target.h>
 #include <canopennode.h>
 
 K_KERNEL_STACK_DEFINE(canopen_tx_workq_stack, CONFIG_CANOPENNODE_TX_WORKQUEUE_STACK_SIZE);
@@ -193,7 +193,7 @@ CO_ReturnError_t CO_CANmodule_init(CO_CANmodule_t *CANmodule,
 	CANmodule->txSize = txSize;
 	CANmodule->CANerrorStatus = 0;
 	CANmodule->CANnormal = false;
-	CANmodule->useCANrxFilters = (rxSize <=32U) ? true : false; // TODO
+	CANmodule->useCANrxFilters = (rxSize <= 32U) ? true : false; // TODO
 	CANmodule->bufferInhibitFlag = false;
 	CANmodule->firstCANtxMessage = false;
 	CANmodule->CANtxCount = 0U;
@@ -384,45 +384,45 @@ void CO_CANmodule_process(CO_CANmodule_t* CANmodule) {
     err = ((uint32_t)txErrors << 16) | ((uint32_t)rxErrors << 8) | overflow;
 
     if (CANmodule->errOld != err) {
-        uint16_t status = CANmodule->CANerrorStatus;
+	uint16_t status = CANmodule->CANerrorStatus;
 
-        CANmodule->errOld = err;
+	CANmodule->errOld = err;
 
-        if (txErrors >= 256U) {
-            /* bus off */
-            status |= CO_CAN_ERRTX_BUS_OFF;
-        } else {
-            /* recalculate CANerrorStatus, first clear some flags */
-            status &= 0xFFFF
-                      ^ (CO_CAN_ERRTX_BUS_OFF | CO_CAN_ERRRX_WARNING | CO_CAN_ERRRX_PASSIVE | CO_CAN_ERRTX_WARNING
-                         | CO_CAN_ERRTX_PASSIVE);
+	if (txErrors >= 256U) {
+	    /* bus off */
+	    status |= CO_CAN_ERRTX_BUS_OFF;
+	} else {
+	    /* recalculate CANerrorStatus, first clear some flags */
+	    status &= 0xFFFF
+		      ^ (CO_CAN_ERRTX_BUS_OFF | CO_CAN_ERRRX_WARNING | CO_CAN_ERRRX_PASSIVE | CO_CAN_ERRTX_WARNING
+			 | CO_CAN_ERRTX_PASSIVE);
 
-            /* rx bus warning or passive */
-            if (rxErrors >= 128) {
-                status |= CO_CAN_ERRRX_WARNING | CO_CAN_ERRRX_PASSIVE;
-            } else if (rxErrors >= 96) {
-                status |= CO_CAN_ERRRX_WARNING;
-            }
+	    /* rx bus warning or passive */
+	    if (rxErrors >= 128) {
+		status |= CO_CAN_ERRRX_WARNING | CO_CAN_ERRRX_PASSIVE;
+	    } else if (rxErrors >= 96) {
+		status |= CO_CAN_ERRRX_WARNING;
+	    }
 
-            /* tx bus warning or passive */
-            if (txErrors >= 128) {
-                status |= CO_CAN_ERRTX_WARNING | CO_CAN_ERRTX_PASSIVE;
-            } else if (txErrors >= 96) {
-                status |= CO_CAN_ERRTX_WARNING;
-            }
+	    /* tx bus warning or passive */
+	    if (txErrors >= 128) {
+		status |= CO_CAN_ERRTX_WARNING | CO_CAN_ERRTX_PASSIVE;
+	    } else if (txErrors >= 96) {
+		status |= CO_CAN_ERRTX_WARNING;
+	    }
 
-            /* if not tx passive clear also overflow */
-            if ((status & CO_CAN_ERRTX_PASSIVE) == 0) {
-                status &= 0xFFFF ^ CO_CAN_ERRTX_OVERFLOW;
-            }
-        }
+	    /* if not tx passive clear also overflow */
+	    if ((status & CO_CAN_ERRTX_PASSIVE) == 0) {
+		status &= 0xFFFF ^ CO_CAN_ERRTX_OVERFLOW;
+	    }
+	}
 
-        if (overflow != 0) {
-            /* CAN RX bus overflow */
-            status |= CO_CAN_ERRRX_OVERFLOW;
-        }
+	if (overflow != 0) {
+	    /* CAN RX bus overflow */
+	    status |= CO_CAN_ERRRX_OVERFLOW;
+	}
 
-        CANmodule->CANerrorStatus = status;
+	CANmodule->CANerrorStatus = status;
     }
 }
 
@@ -430,81 +430,81 @@ void CO_CANinterrupt(CO_CANmodule_t* CANmodule) {
 
     /* receive interrupt */
     if (1) {
-        CO_CANrxMsg_t* rcvMsg;     /* pointer to received message in CAN module */
-        uint16_t index;            /* index of received message */
-        uint32_t rcvMsgIdent;      /* identifier of the received message */
-        CO_CANrx_t* buffer = NULL; /* receive message buffer from CO_CANmodule_t object. */
-        bool_t msgMatched = false;
+	CO_CANrxMsg_t* rcvMsg;     /* pointer to received message in CAN module */
+	uint16_t index;	    /* index of received message */
+	uint32_t rcvMsgIdent;      /* identifier of the received message */
+	CO_CANrx_t* buffer = NULL; /* receive message buffer from CO_CANmodule_t object. */
+	bool_t msgMatched = false;
 
-        rcvMsg = 0; /* get message from module here */
-        rcvMsgIdent = rcvMsg->ident;
-        if (CANmodule->useCANrxFilters) {
-            /* CAN module filters are used. Message with known 11-bit identifier has been received */
-            index = 0; /* get index of the received message here. Or something similar */
-            if (index < CANmodule->rxSize) {
-                buffer = &CANmodule->rxArray[index];
-                /* verify also RTR */
-                if (((rcvMsgIdent ^ buffer->ident) & buffer->mask) == 0U) {
-                    msgMatched = true;
-                }
-            }
-        } else {
-            /* CAN module filters are not used, message with any standard 11-bit identifier */
-            /* has been received. Search rxArray form CANmodule for the same CAN-ID. */
-            buffer = &CANmodule->rxArray[0];
-            for (index = CANmodule->rxSize; index > 0U; index--) {
-                if (((rcvMsgIdent ^ buffer->ident) & buffer->mask) == 0U) {
-                    msgMatched = true;
-                    break;
-                }
-                buffer++;
-            }
-        }
+	rcvMsg = 0; /* get message from module here */
+	rcvMsgIdent = rcvMsg->ident;
+	if (CANmodule->useCANrxFilters) {
+	    /* CAN module filters are used. Message with known 11-bit identifier has been received */
+	    index = 0; /* get index of the received message here. Or something similar */
+	    if (index < CANmodule->rxSize) {
+		buffer = &CANmodule->rxArray[index];
+		/* verify also RTR */
+		if (((rcvMsgIdent ^ buffer->ident) & buffer->mask) == 0U) {
+		    msgMatched = true;
+		}
+	    }
+	} else {
+	    /* CAN module filters are not used, message with any standard 11-bit identifier */
+	    /* has been received. Search rxArray form CANmodule for the same CAN-ID. */
+	    buffer = &CANmodule->rxArray[0];
+	    for (index = CANmodule->rxSize; index > 0U; index--) {
+		if (((rcvMsgIdent ^ buffer->ident) & buffer->mask) == 0U) {
+		    msgMatched = true;
+		    break;
+		}
+		buffer++;
+	    }
+	}
 
-        /* Call specific function, which will process the message */
-        if (msgMatched && (buffer != NULL) && (buffer->CANrx_callback != NULL)) {
-            buffer->CANrx_callback(buffer->object, (void*)rcvMsg);
-        }
+	/* Call specific function, which will process the message */
+	if (msgMatched && (buffer != NULL) && (buffer->CANrx_callback != NULL)) {
+	    buffer->CANrx_callback(buffer->object, (void*)rcvMsg);
+	}
 
-        /* Clear interrupt flag */
+	/* Clear interrupt flag */
     }
 
     /* transmit interrupt */
     else if (0) {
-        /* Clear interrupt flag */
+	/* Clear interrupt flag */
 
-        /* First CAN message (bootup) was sent successfully */
-        CANmodule->firstCANtxMessage = false;
-        /* clear flag from previous message */
-        CANmodule->bufferInhibitFlag = false;
-        /* Are there any new messages waiting to be send */
-        if (CANmodule->CANtxCount > 0U) {
-            uint16_t i; /* index of transmitting message */
+	/* First CAN message (bootup) was sent successfully */
+	CANmodule->firstCANtxMessage = false;
+	/* clear flag from previous message */
+	CANmodule->bufferInhibitFlag = false;
+	/* Are there any new messages waiting to be send */
+	if (CANmodule->CANtxCount > 0U) {
+	    uint16_t i; /* index of transmitting message */
 
-            /* first buffer */
-            CO_CANtx_t* buffer = &CANmodule->txArray[0];
-            /* search through whole array of pointers to transmit message buffers. */
-            for (i = CANmodule->txSize; i > 0U; i--) {
-                /* if message buffer is full, send it. */
-                if (buffer->bufferFull) {
-                    buffer->bufferFull = false;
-                    CANmodule->CANtxCount--;
+	    /* first buffer */
+	    CO_CANtx_t* buffer = &CANmodule->txArray[0];
+	    /* search through whole array of pointers to transmit message buffers. */
+	    for (i = CANmodule->txSize; i > 0U; i--) {
+		/* if message buffer is full, send it. */
+		if (buffer->bufferFull) {
+		    buffer->bufferFull = false;
+		    CANmodule->CANtxCount--;
 
-                    /* Copy message to CAN buffer */
-                    CANmodule->bufferInhibitFlag = buffer->syncFlag;
-                    /* canSend... */
-                    break; /* exit for loop */
-                }
-                buffer++;
-            } /* end of for loop */
+		    /* Copy message to CAN buffer */
+		    CANmodule->bufferInhibitFlag = buffer->syncFlag;
+		    /* canSend... */
+		    break; /* exit for loop */
+		}
+		buffer++;
+	    } /* end of for loop */
 
-            /* Clear counter if no more messages */
-            if (i == 0U) {
-                CANmodule->CANtxCount = 0U;
-            }
-        }
+	    /* Clear counter if no more messages */
+	    if (i == 0U) {
+		CANmodule->CANtxCount = 0U;
+	    }
+	}
     } else {
-        /* some other interrupt reason */
+	/* some other interrupt reason */
     }
 }
 
