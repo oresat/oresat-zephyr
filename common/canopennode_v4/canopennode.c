@@ -6,10 +6,10 @@
 #include <OD.h>
 #include <canopennode.h>
 
-#define CO_SDO_SERVER_STACK_SIZE 2048
+#define CO_SDO_SRV_STACK_SIZE 2048
 #define CO_MAIN_STACK_SIZE 2048
 #define CO_RT_STACK_SIZE 512
-#define CO_SDO_SERVER_PRIORITY 5
+#define CO_SDO_SRV_PRIORITY 5
 #define CO_MAIN_PRIORITY 5
 #define CO_RT_PRIORITY 5
 
@@ -28,14 +28,16 @@ static CO_NMT_reset_cmd_t reset = CO_RESET_NOT;
 static void co_timer_hadler(struct k_timer *timer);
 K_TIMER_DEFINE(co_timer, co_timer_hadler, NULL);
 
-K_THREAD_STACK_DEFINE(co_sdo_server_stack_area, CO_SDO_SERVER_STACK_SIZE);
+K_THREAD_STACK_ARRAY_DEFINE(co_sdo_server_stack_area, OD_CNT_SDO_SRV, CO_SDO_SRV_STACK_SIZE);
+struct k_thread co_sdo_server_threads_data[OD_CNT_SDO_SRV];
+k_tid_t co_sdo_server_tids[OD_CNT_SDO_SRV];
+
 K_THREAD_STACK_DEFINE(co_main_stack_area, CO_MAIN_STACK_SIZE);
-K_THREAD_STACK_DEFINE(co_rt_stack_area, CO_RT_STACK_SIZE);
-struct k_thread co_sdo_server_thread_data;
 struct k_thread co_main_thread_data;
-struct k_thread co_rt_thread_data;
-k_tid_t co_sdo_server_tid;
 k_tid_t co_main_tid;
+
+K_THREAD_STACK_DEFINE(co_rt_stack_area, CO_RT_STACK_SIZE);
+struct k_thread co_rt_thread_data;
 k_tid_t co_rt_tid;
 
 static void co_sdo_server_thread(void *p1, void *p2, void *p3);
@@ -150,11 +152,14 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 	CO_CANsetNormalMode(CO->CANmodule);
 
 	/* start threads */
-	co_sdo_server_tid = k_thread_create(&co_sdo_server_thread_data, co_sdo_server_stack_area,
-					K_THREAD_STACK_SIZEOF(co_sdo_server_stack_area),
+	for (size_t i=0; i<OD_CNT_SDO_SRV; i++) {
+		co_sdo_server_tids[i] = k_thread_create(
+					&co_sdo_server_threads_data[i], co_sdo_server_stack_area[i],
+					K_THREAD_STACK_SIZEOF(co_sdo_server_stack_area[i]),
 					co_sdo_server_thread,
-					NULL, NULL, NULL,
-					CO_SDO_SERVER_PRIORITY, 0, K_NO_WAIT);
+					&CO->SDOserver[i], NULL, NULL,
+					CO_SDO_SRV_PRIORITY, 0, K_NO_WAIT);
+	}
 	co_main_tid = k_thread_create(&co_main_thread_data, co_main_stack_area,
 					K_THREAD_STACK_SIZEOF(co_main_stack_area),
 					co_main_thread,
@@ -178,6 +183,12 @@ bool canopennode_is_running(void) {
 void canopennode_stop(const struct device *dev) {
 	/* stop threads */
 	reset = CO_RESET_QUIT;
+	k_thread_join(&co_rt_thread_data, K_MSEC(1));
+	k_thread_join(&co_main_thread_data, K_MSEC(1));
+	for (int i=0; i<OD_CNT_SDO_SRV; i++) {
+		k_thread_resume(co_sdo_server_tids[i]);
+		k_thread_join(&co_sdo_server_threads_data[i], K_MSEC(1));
+	}
 
 	/* delete objects from memory */
 	if (dev != NULL) {
@@ -193,10 +204,9 @@ static void process_cb(void *tid) {
 }
 
 static void co_sdo_server_thread(void *p1, void *p2, void *p3) {
-	ARG_UNUSED(p1);
+	CO_SDOserver_t *SDOserver = (CO_SDOserver_t *)p1;
 	ARG_UNUSED(p2);
 	ARG_UNUSED(p3);
-	CO_SDOserver_t *SDOserver = &CO->SDOserver[0];
 	uint64_t timestamp;
 	uint32_t elapsed_us = -1;
 	k_tid_t tid = k_current_get();
