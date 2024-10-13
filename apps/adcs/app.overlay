@@ -1,34 +1,3 @@
-/ {
-	chosen {
-		zephyr,code-partition = &app_partition;
-	};
-};
-
-&flash0 {
-	partitions {
-		compatible = "fixed-partitions";
-		#address-cells = <1>;
-		#size-cells = <1>;
-
-		boot_partition: partition@0 {
-			label = "boot";
-			reg = <0x08000000 DT_SIZE_K(40)>;
-		};
-
-		metadata_partition: partition@A000 {
-			label = "metadata";
-			reg = <0x0800A000 DT_SIZE_K(2)>;
-		};
-
-		app_partition: partition@A800 {
-			label = "app";
-			reg = <0x0800A800 DT_SIZE_K(214)>;
-		};
-
-		/* storage_partition 6K defined in nucleo_f091rc.dts */
-	};
-};
-
 &i2c1 {
 	status = "okay";
 
