@@ -35,15 +35,12 @@
 #endif
 
 #ifndef CO_CONFIG_SYNC
-#define CO_CONFIG_SYNC CO_CONFIG_SYNC_ENABLE
+#define CO_CONFIG_SYNC 0
 #endif
 
 #ifndef CO_CONFIG_PDO
-#define CO_CONFIG_PDO (CO_CONFIG_RPDO_ENABLE | \
-                       CO_CONFIG_TPDO_ENABLE | \
-                       CO_CONFIG_RPDO_TIMERS_ENABLE | \
+#define CO_CONFIG_PDO (CO_CONFIG_TPDO_ENABLE | \
                        CO_CONFIG_TPDO_TIMERS_ENABLE | \
-                       CO_CONFIG_PDO_SYNC_ENABLE | \
                        CO_CONFIG_PDO_OD_IO_ACCESS | \
                        CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE | \
                        CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | \
