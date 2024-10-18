@@ -66,34 +66,6 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 		printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
 	}
 
-	/* add node_id to sdo cob ids */
-	uint32_t cob_id;
-	OD_entry_t *entry;
-#if OD_CNT_RPDO > 0
-	for (int i = 0; i < OD_CNT_RPDO; i++) {
-		entry = OD_find(OD, 0x1400 + i);
-		if (!entry) {
-			continue;
-		}
-		OD_get_u32(entry, 1, &cob_id, true);
-		if (cob_id == 0x180U + (0x100U * (i % 4))) {
-			OD_set_u32(entry, 1, cob_id + node_id + (i / 4), true);
-		}
-	}
-#endif
-#if OD_CNT_TPDO > 0
-	for (int i = 0; i < OD_CNT_TPDO; i++) {
-		entry = OD_find(OD, 0x1800 + i);
-		if (!entry) {
-			continue;
-		}
-		OD_get_u32(entry, 1, &cob_id, true);
-		if (cob_id == 0x180U + (0x100U * (i % 4))) {
-			OD_set_u32(entry, 1, cob_id + node_id + (i / 4), true);
-		}
-	}
-#endif
-
 	/* CANopen communication reset - initialize CANopen objects */
 	printf("CANopenNode - Reset communication...\n");
 

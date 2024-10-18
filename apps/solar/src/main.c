@@ -15,7 +15,8 @@
 int main(void)
 {
 	k_timepoint_t timepoint;
-	uint8_t node_id = get_node_id();
+	uint8_t node_id = oresat_get_node_id();
+	oresat_fix_cob_ids_in_od(node_id);
 
 	canopennode_init(CAN_INTERFACE, CAN_BITRATE, node_id);
 	board_sensors_init();
