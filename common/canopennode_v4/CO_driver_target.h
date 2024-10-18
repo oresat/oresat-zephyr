@@ -66,14 +66,17 @@ typedef struct canopen_rx_msg {
 #define CO_SWAP_32(x) x
 #define CO_SWAP_64(x) x
 
-static inline uint16_t CO_CANrxMsg_readIdent(void *rxMsg) {
+static inline uint16_t CO_CANrxMsg_readIdent(void *rxMsg)
+{
 	return ((struct can_frame *)rxMsg)->id;
 }
 
-static inline uint16_t CO_CANrxMsg_readDLC(void *rxMsg) {
+static inline uint16_t CO_CANrxMsg_readDLC(void *rxMsg)
+{
 	return ((struct can_frame *)rxMsg)->dlc;
 }
-static inline const uint8_t* CO_CANrxMsg_readData(void* rxMsg) {
+static inline const uint8_t *CO_CANrxMsg_readData(void *rxMsg)
+{
 	return ((struct can_frame *)rxMsg)->data;
 }
 
@@ -81,8 +84,8 @@ static inline const uint8_t* CO_CANrxMsg_readData(void* rxMsg) {
 typedef struct {
 	uint16_t ident;
 	uint16_t mask;
-	void* object;
-	void (*CANrx_callback)(void* object, void* message);
+	void *object;
+	void (*CANrx_callback)(void *object, void *message);
 } CO_CANrx_t;
 
 /* Transmit message object */
@@ -96,10 +99,10 @@ typedef struct {
 
 /* CAN module object */
 typedef struct {
-	void* CANptr;
-	CO_CANrx_t* rxArray;
+	void *CANptr;
+	CO_CANrx_t *rxArray;
 	uint16_t rxSize;
-	CO_CANtx_t* txArray;
+	CO_CANtx_t *txArray;
 	uint16_t txSize;
 	uint16_t CANerrorStatus;
 	volatile bool_t CANnormal;
@@ -112,40 +115,40 @@ typedef struct {
 
 /* Data storage object for one entry */
 typedef struct {
-	void* addr;
+	void *addr;
 	size_t len;
 	uint8_t subIndexOD;
 	uint8_t attr;
 	/* Additional variables (target specific) */
-	void* addrNV;
+	void *addrNV;
 } CO_storage_entry_t;
 
 /* Synchronization between CAN receive and message processing threads. */
 #define CO_MemoryBarrier()
 #define CO_FLAG_READ(rxNew) ((rxNew) != NULL)
-#define CO_FLAG_SET(rxNew)      \
-	{	                            \
-		CO_MemoryBarrier();         \
-		rxNew = (void*)1L;          \
+#define CO_FLAG_SET(rxNew)                                                                         \
+	{                                                                                          \
+		CO_MemoryBarrier();                                                                \
+		rxNew = (void *)1L;                                                                \
 	}
-#define CO_FLAG_CLEAR(rxNew)    \
-	{                             \
-		CO_MemoryBarrier();         \
-		rxNew = NULL;               \
+#define CO_FLAG_CLEAR(rxNew)                                                                       \
+	{                                                                                          \
+		CO_MemoryBarrier();                                                                \
+		rxNew = NULL;                                                                      \
 	}
 
-void canopen_send_lock(CO_CANmodule_t* CANmodule);
-void canopen_send_unlock(CO_CANmodule_t* CANmodule);
+void canopen_send_lock(CO_CANmodule_t *CANmodule);
+void canopen_send_unlock(CO_CANmodule_t *CANmodule);
 #define CO_LOCK_CAN_SEND(module)   canopen_send_lock(module)
 #define CO_UNLOCK_CAN_SEND(module) canopen_send_unlock(module)
 
-void canopen_emcy_lock(CO_CANmodule_t* CANmodule);
-void canopen_emcy_unlock(CO_CANmodule_t* CANmodule);
+void canopen_emcy_lock(CO_CANmodule_t *CANmodule);
+void canopen_emcy_unlock(CO_CANmodule_t *CANmodule);
 #define CO_LOCK_EMCY(module)   canopen_emcy_lock(module)
 #define CO_UNLOCK_EMCY(module) canopen_emcy_unlock(module)
 
-void canopen_od_lock(CO_CANmodule_t* CANmodule);
-void canopen_od_unlock(CO_CANmodule_t* CANmodule);
+void canopen_od_lock(CO_CANmodule_t *CANmodule);
+void canopen_od_unlock(CO_CANmodule_t *CANmodule);
 #define CO_LOCK_OD(module)   canopen_od_lock(module)
 #define CO_UNLOCK_OD(module) canopen_od_unlock(module)
 
@@ -155,8 +158,16 @@ void canopen_od_unlock(CO_CANmodule_t* CANmodule);
  */
 #define CANrxMemoryBarrier()
 #define IS_CANrxNew(rxNew) ((uintptr_t)rxNew)
-#define SET_CANrxNew(rxNew) { CANrxMemoryBarrier(); rxNew = (void *)1L; }
-#define CLEAR_CANrxNew(rxNew) { CANrxMemoryBarrier(); rxNew = (void *)0L; }
+#define SET_CANrxNew(rxNew)                                                                        \
+	{                                                                                          \
+		CANrxMemoryBarrier();                                                              \
+		rxNew = (void *)1L;                                                                \
+	}
+#define CLEAR_CANrxNew(rxNew)                                                                      \
+	{                                                                                          \
+		CANrxMemoryBarrier();                                                              \
+		rxNew = (void *)0L;                                                                \
+	}
 
 #ifdef __cplusplus
 }

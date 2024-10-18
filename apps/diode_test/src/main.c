@@ -7,11 +7,13 @@
 #include "oresat.h"
 
 #define CAN_INTERFACE DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus))
-#define CAN_BITRATE (DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bitrate, \
-					  DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bus_speed, \
-						     CONFIG_CAN_DEFAULT_BITRATE)) / 1000)
+#define CAN_BITRATE                                                                                \
+	(DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bitrate,                                             \
+		    DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bus_speed, CONFIG_CAN_DEFAULT_BITRATE)) / \
+	 1000)
 
-int main(void) {
+int main(void)
+{
 	k_timepoint_t timepoint;
 	uint8_t node_id = get_node_id();
 

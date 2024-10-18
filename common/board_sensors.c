@@ -11,7 +11,8 @@
 const struct device *const dev_vref = DEVICE_DT_GET_ONE(st_stm32_vref);
 static const struct device *const devs_die_temp[] = {LISTIFY(1, DIE_TEMPERATURE_SENSOR, ())};
 
-void board_sensors_init(void) {
+void board_sensors_init(void)
+{
 	if (!device_is_ready(dev_vref)) {
 		printf("sensor: device %s not ready.\n", dev_vref->name);
 	}
@@ -23,7 +24,8 @@ void board_sensors_init(void) {
 	}
 }
 
-void board_sensors_fill_od(void) {
+void board_sensors_fill_od(void)
+{
 	struct sensor_value vref;
 	sensor_sample_fetch(dev_vref);
 	sensor_channel_get(dev_vref, SENSOR_CHAN_VOLTAGE, &vref);

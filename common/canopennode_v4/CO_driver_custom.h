@@ -3,12 +3,12 @@
 
 #define CO_USE_GLOBALS
 #define CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE CO_CONFIG_FLAG_CALLBACK_PRE
-#define CO_CONFIG_GLOBAL_FLAG_TIMERNEXT CO_CONFIG_FLAG_TIMERNEXT
+#define CO_CONFIG_GLOBAL_FLAG_TIMERNEXT    CO_CONFIG_FLAG_TIMERNEXT
 
 #ifndef CO_CONFIG_NMT
-#define CO_CONFIG_NMT (CO_CONFIG_NMT_CALLBACK_CHANGE | \
-                       CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE | \
-                       CO_CONFIG_GLOBAL_FLAG_TIMERNEXT)
+#define CO_CONFIG_NMT                                                                              \
+	(CO_CONFIG_NMT_CALLBACK_CHANGE | CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE |                      \
+	 CO_CONFIG_GLOBAL_FLAG_TIMERNEXT)
 #endif
 
 #ifndef CO_CONFIG_HB_CONS
@@ -20,10 +20,9 @@
 #endif
 
 #ifndef CO_CONFIG_SDO_SRV
-#define CO_CONFIG_SDO_SRV (CO_CONFIG_SDO_SRV_SEGMENTED | \
-                           CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE | \
-                           CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | \
-                           CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC)
+#define CO_CONFIG_SDO_SRV                                                                          \
+	(CO_CONFIG_SDO_SRV_SEGMENTED | CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE |                        \
+	 CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC)
 #endif
 
 #ifndef CO_CONFIG_SDO_CLI
@@ -39,12 +38,10 @@
 #endif
 
 #ifndef CO_CONFIG_PDO
-#define CO_CONFIG_PDO (CO_CONFIG_TPDO_ENABLE | \
-                       CO_CONFIG_TPDO_TIMERS_ENABLE | \
-                       CO_CONFIG_PDO_OD_IO_ACCESS | \
-                       CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE | \
-                       CO_CONFIG_GLOBAL_FLAG_TIMERNEXT | \
-                       CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC)
+#define CO_CONFIG_PDO                                                                              \
+	(CO_CONFIG_TPDO_ENABLE | CO_CONFIG_TPDO_TIMERS_ENABLE | CO_CONFIG_PDO_OD_IO_ACCESS |       \
+	 CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE | CO_CONFIG_GLOBAL_FLAG_TIMERNEXT |                    \
+	 CO_CONFIG_GLOBAL_FLAG_OD_DYNAMIC)
 #endif
 
 #ifndef CO_CONFIG_STORAGE
@@ -80,9 +77,8 @@
 #endif
 
 #ifndef CO_CONFIG_FIFO
-#define CO_CONFIG_FIFO (CO_CONFIG_FIFO_ENABLE | \
-                        CO_CONFIG_FIFO_ALT_READ | \
-                        CO_CONFIG_FIFO_CRC16_CCITT)
+#define CO_CONFIG_FIFO                                                                             \
+	(CO_CONFIG_FIFO_ENABLE | CO_CONFIG_FIFO_ALT_READ | CO_CONFIG_FIFO_CRC16_CCITT)
 #endif
 
 #ifndef CO_CONFIG_TRACE
