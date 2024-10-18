@@ -11,6 +11,8 @@
 # should properly set; then enable the Kconfig variable CONFIG_USE_DT_CODE_PARTITION=y
 # so your application gets linked to the correct starting address in flash storage. 
 # 
+# Author: Reece Wayt
+#
 # Reference Material: 
 # ---------------------------------------------------------------------------------
 # MCUBoot comes packaged with an example application that this Makefile is based on
@@ -21,7 +23,16 @@
 # 	| $ make <BOARD=optional> <target>
 # 	|
 # 	|-> ### pass argument board to adjust hard-coded target below
+# TODO: 	
 # ---------------------------------------------------------------------------------- 	
+# MCUboot comes packaged with some keys, this makefile uses said key; This should not
+# be used in production code. Use the siging tool instead.
+#
+# Example Usage of signing tool: 
+# 	$ west sign -t imgtool -- --key bootloader/mcuboot/root-rsa-2048.pem
+#	
+# The above command creates an image file called zephyr.signed.bin in the build directory.
+# -----------------------------------------------------------------------------------
 
 # Automatically detect the serial port
 SERIAL_PORT := $(shell ls /dev/ttyACM* 2>/dev/null | head -n 1)
