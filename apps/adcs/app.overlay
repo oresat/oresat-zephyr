@@ -1,11 +1,11 @@
 &i2c1 {
 	status = "okay";
 
-	bmi08x-gryo@18 {
+	bmi08x-gryo@68 {
 		status = "okay";
 		compatible = "bosch,bmi08x-gyro";
-		reg = <0x18>;
-		gyro-hz = "1000_116";
+		reg = <0x68>;
+		gyro-hz = "100_32";
 		gyro-fs = <1000>;
 	};
 };
