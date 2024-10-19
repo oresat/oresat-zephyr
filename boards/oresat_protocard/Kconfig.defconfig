@@ -1,0 +1,10 @@
+# STM32 Nucleo-64 development board with STM32F091RC MCU
+
+if BOARD_ORESAT_PROTOCARD
+
+config SPI_STM32_INTERRUPT
+	default y
+	depends on SPI
+
+endif # BOARD_ORESAT_PROTOCARD
+
