@@ -28,6 +28,60 @@
 	};
 };
 
+&adc1 {
+	pinctrl-0 = <&adc1_in1_pa0>; /* PHA_ISNS */
+	pinctrl-names = "default";
+	st,adc-clock-source = <SYNC>;
+	st,adc-prescaler = <4>;
+	status = "okay";
+};
+
+&adc2 {
+	pinctrl-0 = <&adc1_in2_pa1>; /* PHB_ISNS */
+	pinctrl-names = "default";
+	st,adc-clock-source = <SYNC>;
+	st,adc-prescaler = <4>;
+	status = "okay";
+};
+
+&adc3 {
+	pinctrl-0 = <&adc3_in1_pb1>; /* PHC_ISNS */
+	pinctrl-names = "default";
+	st,adc-clock-source = <SYNC>;
+	st,adc-prescaler = <4>;
+	status = "okay";
+};
+
+/* adc4 is already configured correctly */
+
+&adc5 {
+	pinctrl-0 = <&adc5_in1_pa8 &adc5_in2_pa9>; /* THERM_A and THERM_B */
+	pinctrl-names = "default";
+	st,adc-clock-source = <SYNC>;
+	st,adc-prescaler = <4>;
+	status = "okay";
+};
+
+&dac1 {
+	pinctrl-0 = <&dac1_out1_pa4 &dac1_out2_pa5>; /* SCOPE0 and SCOPE1 */
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&dac2 {
+	pinctrl-0 = <&dac2_out1_pa6>; /* SCOPE2 */
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&dac3 {
+	status = "disabled";
+};
+
+&dac4 {
+	status = "disabled";
+};
+
 &fdcan1 {
 	status = "disabled";
 };
@@ -46,6 +100,16 @@
 	status = "disabled";
 };
 
+&i2c2 {
+	status = "disabled";
+};
+
+&i2c3 {
+	status = "disabled";
+};
+
+/* lpuart1 is already configured correctly */
+
 &spi1 {
 	status = "disabled";
 };
@@ -54,4 +118,24 @@
 	status = "disabled"; /* default pins used by fdcan2 */
 };
 
-/* spi3 is already configure correctly */
+/* spi3 is already configured correctly */
+
+&uart4 {
+	status = "disabled";
+};
+
+&uart5 {
+	status = "disabled";
+};
+
+&usart1 {
+	status = "disabled";
+};
+
+&usart2 {
+	status = "disabled";
+};
+
+&usart3 {
+	status = "disabled";
+};
