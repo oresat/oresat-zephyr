@@ -1,0 +1,57 @@
+/ {
+	chosen {
+		zephyr,canbus = &fdcan2;
+	};
+
+	gpio_inputs {
+		compatible = "gpio-keys";
+		debug1: debug_1 {
+			gpios = <&gpiob 58 GPIO_ACTIVE_LOW>;
+			label = "DEBUG1";
+		};
+		debug2: debug_2 {
+			gpios = <&gpiob 57 GPIO_ACTIVE_LOW>;
+			label = "DEBUG2";
+		};
+		debug3: debug_3 {
+			gpios = <&gpiod 55 GPIO_ACTIVE_LOW>;
+			label = "DEBUG3";
+		};
+	};
+
+	gpio_outputs {
+		compatible = "gpio-leds";
+		debug0: debug_0 {
+			gpios = <&gpiob 62 GPIO_ACTIVE_LOW>;
+			label = "DEBUG0";
+		};
+	};
+};
+
+&fdcan1 {
+	status = "disabled";
+};
+
+&fdcan2 {
+	pinctrl-0 = <&fdcan2_rx_pb12 &fdcan2_tx_pb13>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&fdcan3 {
+	status = "disabled";
+};
+
+&i2c1 {
+	status = "disabled";
+};
+
+&spi1 {
+	status = "disabled";
+};
+
+&spi2 {
+	status = "disabled"; /* default pins used by fdcan2 */
+};
+
+/* spi3 is already configure correctly */
