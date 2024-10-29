@@ -1,3 +1,7 @@
+
+#workspace
+zephyr-workspace/
+
 # editors
 .vscode
 *.swp
