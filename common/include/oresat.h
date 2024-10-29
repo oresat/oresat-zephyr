@@ -20,11 +20,12 @@ extern "C" {
 #endif
 
 typedef struct {
-//    CANDriver *cand;
-    uint8_t node_id;
-    uint16_t bitrate;
-//    const flt_reg_t *fifo1_filters;
-    size_t filter_count;
+//  CANDriver *cand;
+  uint8_t node_id;
+  uint16_t bitrate;
+//  const flt_reg_t *fifo1_filters;
+  s
+  }ize_t filter_count;
 } oresat_config_t;
 
 /* OreSat initialization and main process */
