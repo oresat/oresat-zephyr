@@ -1,0 +1,19 @@
+app:
+  name: oresat-diode-test
+common:
+  tags:
+    - can
+    - canopen
+  modules:
+    - canopennode
+tests:
+  blinky:
+    tags:
+      - LED
+      - gpio
+    filter: dt_enabled_alias_with_parent_compat("led0", "gpio-leds")
+    depends_on: gpio
+    harness: led
+    integration_platforms:
+      - nucleo_f091rc
+
