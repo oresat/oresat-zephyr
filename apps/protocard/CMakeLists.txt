@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.20.0)
 
 set(ORESAT_ROOT "$ENV{ZEPHYR_BASE}/../..")
 set(COMMON_SRC "${ORESAT_ROOT}/common")
+
 #cmake_print_variables(ORESAT_ROOT)
 #cmake_print_variables(COMMON_SRC)
 
@@ -18,17 +19,6 @@ project("oresat-${CARD}" LANGUAGES C)
 
 execute_process(COMMAND bash -c "oresat-configs fw-files ${CARD} -d gen")
 
-target_sources(app 
-  PRIVATE 
-    main.c
-    gen/OD.c
-    src/diode_test.c
-    #    src/blinky.c
-    #    ${COMMON_SRC}/oresat.c
-)
-
-zephyr_include_directories(gen)
-
 target_compile_options(app 
   PRIVATE 
     -Wall 
@@ -37,9 +27,19 @@ target_compile_options(app
     -Wstrict-prototypes
 )
 
+zephyr_include_directories(gen)
+
 target_include_directories(app 
   PRIVATE 
-    src/include/
-    ${COMMON_SRC}/include/
-    ${COMMON_SRC}/canopennode_v4/
+    src/
+    #    ${COMMON_SRC}/include/
 )
+
+target_sources(app 
+  PRIVATE 
+    src/main.c
+    gen/OD.c
+    src/diode_test.c
+    #    ${COMMON_SRC}/oresat.c
+)
+

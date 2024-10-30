@@ -1,5 +1,11 @@
 app:
-  name: protocard
+  name: oresat-diode-test
+common:
+  tags:
+    - can
+    - canopen
+  modules:
+    - canopennode
 tests:
   blinky:
     tags:
@@ -9,4 +15,5 @@ tests:
     depends_on: gpio
     harness: led
     integration_platforms:
-      - frdm_k64f
+      - nucleo_f091rc
+
