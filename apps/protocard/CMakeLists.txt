@@ -22,8 +22,8 @@ target_sources(app
   PRIVATE 
     main.c
     gen/OD.c
-    src/blinky.c
-    src/protocard.c
+    src/diode_test.c
+    #    src/blinky.c
     #    ${COMMON_SRC}/oresat.c
 )
 

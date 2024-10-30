@@ -1,0 +1,5 @@
+board:
+  name: diode_test
+  vendor: st
+  socs:
+    - name: stm32f091xc

@@ -1,4 +1,4 @@
-BOARD= oresat_protocard
+BOARD= diode_test
 OPTIONS= -p always 
 BUILD_DIR= build/
 

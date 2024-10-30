@@ -12,17 +12,21 @@
 #include <OD.h>
 #include "board_sensors.h"
 #include "oresat.h"
-#include "blinky.h"
+#include "diode_test.h"
 
 #define CAN_INTERFACE DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus))
-#define CAN_BITRATE                                                                    \
-	(DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bitrate,                                       \
-		    DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bus_speed, CONFIG_CAN_DEFAULT_BITRATE)) / \
-	 1000)
+#define CAN_BITRATE                                \
+	(DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bitrate,   \
+	 DT_PROP_OR(DT_CHOSEN(zephyr_canbus), bus_speed, \
+   CONFIG_CAN_DEFAULT_BITRATE)) / 1000)
 
 int app_init(void)
 {
+  dtc_init();
+  
   startBlinkyThread();
+  startWatchThread();
+  startControlThread();
 
   return 0;
 }

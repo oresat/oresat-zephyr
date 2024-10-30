@@ -1,0 +1,28 @@
+identifier: diode_test
+name: Diode Test
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+ram: 32
+flash: 256
+supported:
+  - gpio
+  - i2c
+  - nvs
+  - spi
+  - counter
+  - watchdog
+  - adc
+  - dac
+  - dma
+  - pwm
+  - can
+  - rtc
+testing:
+  ignore_tags:
+    - net
+    - bluetooth
+vendor: st
