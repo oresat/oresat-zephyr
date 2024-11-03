@@ -6,6 +6,7 @@
 #include <OD.h>
 #include "board_sensors.h"
 #include "oresat.h"
+#include "aux_adc.h"
 
 #define RW_BASE_NODE_ID 0x3C
 #define CAN_INTERFACE   DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus))
@@ -55,10 +56,12 @@ int main(void)
 
 	canopennode_init(CAN_INTERFACE, CAN_BITRATE, node_id);
 	board_sensors_init();
+	aux_adc_init();
 
 	while (canopennode_is_running()) {
 		timepoint = sys_timepoint_calc(K_MSEC(1000));
 		board_sensors_fill_od();
+		aux_adc_update();
 		k_sleep(sys_timepoint_timeout(timepoint));
 	}
 

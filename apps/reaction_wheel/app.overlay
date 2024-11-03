@@ -3,6 +3,11 @@
 		zephyr,canbus = &fdcan2;
 	};
 
+	zephyr,user {
+	  io-channels = <&adc1 1>, <&adc1 2>, <&adc3 1>, <&adc5 1>, <&adc5 2>;
+		io-channel-names = "PHA_ISNS", "PHB_ISNS", "PHC_ISNS", "THERM_A", "THERM_B";
+	};
+
 	gpio_inputs {
 		compatible = "gpio-keys";
 		debug1: debug_1 {
@@ -29,37 +34,75 @@
 };
 
 &adc1 {
-	pinctrl-0 = <&adc1_in1_pa0>; /* PHA_ISNS */
-	pinctrl-names = "default";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
 	st,adc-clock-source = <SYNC>;
 	st,adc-prescaler = <4>;
-	status = "okay";
+
+	channel@1 { /* PHA_ISNS */
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@2 { /* PHB_ISNS */
+		reg = <2>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
 };
 
-&adc2 {
-	pinctrl-0 = <&adc1_in2_pa1>; /* PHB_ISNS */
-	pinctrl-names = "default";
-	st,adc-clock-source = <SYNC>;
-	st,adc-prescaler = <4>;
-	status = "okay";
-};
+/*&adc2 {
+	status = "disabled";
+};*/
 
 &adc3 {
-	pinctrl-0 = <&adc3_in1_pb1>; /* PHC_ISNS */
-	pinctrl-names = "default";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
 	st,adc-clock-source = <SYNC>;
 	st,adc-prescaler = <4>;
-	status = "okay";
+
+	channel@1 { /* PHC_ISNS */
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
 };
 
-/* adc4 is already configured correctly */
+/*&adc4 {
+	status = "disabled";
+};*/
 
 &adc5 {
-	pinctrl-0 = <&adc5_in1_pa8 &adc5_in2_pa9>; /* THERM_A and THERM_B */
-	pinctrl-names = "default";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
 	st,adc-clock-source = <SYNC>;
 	st,adc-prescaler = <4>;
-	status = "okay";
+
+	channel@1 { /* THERM_A */
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@2 { /* THERM_B */
+		reg = <2>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
 };
 
 &dac1 {
