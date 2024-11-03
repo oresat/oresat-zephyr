@@ -4,7 +4,7 @@
 	};
 
 	zephyr,user {
-	  io-channels = <&adc1 1>, <&adc1 2>, <&adc3 1>, <&adc5 1>, <&adc5 2>;
+		io-channels = <&adc1 1>, <&adc1 2>, <&adc3 1>, <&adc5 1>, <&adc5 2>;
 		io-channel-names = "PHA_ISNS", "PHB_ISNS", "PHC_ISNS", "THERM_A", "THERM_B";
 	};
 
@@ -57,9 +57,9 @@
 	};
 };
 
-/*&adc2 {
+&adc2 {
 	status = "disabled";
-};*/
+};
 
 &adc3 {
 	status = "okay";
@@ -77,9 +77,9 @@
 	};
 };
 
-/*&adc4 {
+&adc4 {
 	status = "disabled";
-};*/
+};
 
 &adc5 {
 	status = "okay";
