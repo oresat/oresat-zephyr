@@ -7,6 +7,7 @@
 #include "board_sensors.h"
 #include "oresat.h"
 #include "aux_adc.h"
+#include "pwm.h"
 
 #define RW_BASE_NODE_ID 0x3C
 #define CAN_INTERFACE   DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus))
@@ -57,6 +58,7 @@ int main(void)
 	canopennode_init(CAN_INTERFACE, CAN_BITRATE, node_id);
 	board_sensors_init();
 	aux_adc_init();
+	hrtim_pwm_start();
 
 	while (canopennode_is_running()) {
 		timepoint = sys_timepoint_calc(K_MSEC(1000));
@@ -65,6 +67,7 @@ int main(void)
 		k_sleep(sys_timepoint_timeout(timepoint));
 	}
 
+	hrtim_pwm_stop();
 	canopennode_stop(CAN_INTERFACE);
 	sys_reboot(SYS_REBOOT_COLD);
 

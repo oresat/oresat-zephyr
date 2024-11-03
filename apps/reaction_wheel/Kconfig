@@ -1,5 +1,9 @@
 menu "Zephyr"
 source "Kconfig.zephyr"
+config MYAPP_STM32
+  default y
+  bool
+  select USE_STM32_HAL_HRTIM
 endmenu
 
 module = APP

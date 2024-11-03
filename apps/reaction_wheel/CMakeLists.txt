@@ -10,7 +10,10 @@ execute_process(COMMAND bash -c "oresat-configs fw-files ${CARD} -d gen")
 target_sources(app PRIVATE
   src/main.c
   src/aux_adc.c
+  src/pwm.c
+  src/cube/hrtim.c
   gen/OD.c
 )
 
 zephyr_include_directories(gen)
+zephyr_include_directories(src/cube)
