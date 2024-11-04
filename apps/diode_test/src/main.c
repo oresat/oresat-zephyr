@@ -24,9 +24,9 @@ int app_init(void)
 {
   dtc_init();
   
+  startControlThread();
   startBlinkyThread();
   startWatchThread();
-  startControlThread();
 
   return 0;
 }
@@ -36,7 +36,8 @@ int main(void)
   app_init();
 
 	k_timepoint_t timepoint;
-	uint8_t node_id = oresat_get_node_id();
+	//uint8_t node_id = oresat_get_node_id();
+	uint8_t node_id = DTC_CO_NODE_ID;
 	oresat_fix_pdo_cob_ids(node_id);
 
 	canopennode_init(CAN_INTERFACE, CAN_BITRATE, node_id);

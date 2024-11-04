@@ -4,16 +4,34 @@ common:
   tags:
     - can
     - canopen
+    - DAC
+    - userspac
+    - adc
   modules:
     - canopennode
 tests:
-  blinky:
+  tests:
+  drivers.adc:
+    depends_on: adc
+    min_flash: 40
+  sample.drivers.dac:
     tags:
       - LED
       - gpio
-    filter: dt_enabled_alias_with_parent_compat("led0", "gpio-leds")
-    depends_on: gpio
-    harness: led
+      - adc
+    filter: 
+      - dt_enabled_alias_with_parent_compat("led0", "gpio-leds")
+      #- dt_enabled_alias_with_parent_compat("mux_en", "gpio-mux")
+    depends_on: 
+      - gpio 
+      - dac
+      - adc
     integration_platforms:
       - nucleo_f091rc
-
+    harness: 
+      - led
+      - console
+    harness_config:
+      type: one_line
+      regex:
+        - Generating sawtooth signal at DAC channel ([0-9]*).

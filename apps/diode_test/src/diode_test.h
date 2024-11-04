@@ -12,6 +12,8 @@
 #define LED0_NODE DT_ALIAS(led0)
 #define MUX_EN_NODE DT_ALIAS(mux_en)
 
+#define DTC_CO_NODE_ID 0x54
+
 /*
 #if ENABLE_SERIAL_DEBUG_OUTPUT || ENABLE_NV_MEMORY_UPDATE_CODE
 #define DEBUG_SERIAL    (BaseSequentialStream*) &SD2
@@ -93,7 +95,7 @@ typedef struct
   uint16_t *pdac;
   uint16_t *pstatus;
   uint16_t *perror;
-  void (*pfunc[MAX_FUNCTIONS])(void);
+  int (*pfunc[MAX_FUNCTIONS])(void);
   adcsample_t *pled_current;
   adcsample_t *pled_swir_pd_current;
   adcsample_t *puv_pd_current;
@@ -125,18 +127,18 @@ extern int startControlThread(void);
 /*
  * function declaration
  */
-void dtc_init(void);
-void dtc_callCtrlThreadFunctions(void);
-void dtc_dacStart(void);
-void dtc_dacStop(void);
-void dtc_dacSet(void);
-void dtc_gptStart(void);
-void dtc_gptStop(void);
-void dtc_adcStart(void);
-void dtc_adcStop(void);
-void dtc_muxEnable(void);
-void dtc_muxDisable(void);
-void dtc_muxSelect(void);
-void dtc_clearErrors(void);
+int dtc_init(void);
+int dtc_callCtrlThreadFunctions(void);
+int dtc_dacStart(void);
+int dtc_dacStop(void);
+int dtc_dacSet(void);
+int dtc_gptStart(void);
+int dtc_gptStop(void);
+int dtc_adcStart(void);
+int dtc_adcStop(void);
+int dtc_muxEnable(void);
+int dtc_muxDisable(void);
+int dtc_muxSelect(void);
+int dtc_clearErrors(void);
 
 #endif // _DIODE_TEST_H_
