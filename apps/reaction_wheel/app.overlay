@@ -1,3 +1,17 @@
+/*
+RW 7.2 device tree
+
+As of Nov 2024, Zephyr does not support HRTIM (High-Resolution Timers) for PWM.
+So all HRTIM pins are configured via src/cube/hrtim.* (Generate CubeMX code).
+Pins this includes:
+- PC6: PHC_H
+- PC7: PHC_L
+- PC8: PHB_H
+- PC9: PHB_L
+- PA10: PHA_H
+- PA11: PHA_L
+*/
+
 / {
 	chosen {
 		zephyr,canbus = &fdcan2;

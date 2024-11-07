@@ -1,4 +1,4 @@
-// #include "stm32g4xx_hal_hrtim.h"
+#include <stdint.h>
 #include <assert.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -6,8 +6,6 @@
 #include "stm32g4xx_hal_hrtim.h"
 #include "hrtim.h"
 #include "pwm.h"
-
-#define HRTIM_HANDLE hhrtim1
 
 /*
 PHA: TIMER B: PA10 and PA11
