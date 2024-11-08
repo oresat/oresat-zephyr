@@ -47,6 +47,13 @@ static const struct adc_dt_spec adc_channels[] = {
 			     DT_SPEC_AND_COMMA)
 };
 
+static const struct gpio_dt_spec led0 = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+static const struct gpio_dt_spec mux_en = GPIO_DT_SPEC_GET(MUX_EN_NODE, gpios);
+static const struct gpio_dt_spec mux_a0 = GPIO_DT_SPEC_GET(MUX_A0_NODE, gpios);
+static const struct gpio_dt_spec mux_a1 = GPIO_DT_SPEC_GET(MUX_A1_NODE, gpios);
+static const struct gpio_dt_spec mux_a2 = GPIO_DT_SPEC_GET(MUX_A2_NODE, gpios);
+//static const struct device *gpio_dev = device_get_binding(MUX_PINS);
+
 /*
  * dtc_callCtrlThreadFunctions
  * gets called every time the ctrl_thread polls OD dtc_ctrl 
@@ -173,113 +180,6 @@ int dtc_dacSet(void)
   {
     //TODO: set bit in error object
   }
-
-  return 0;
-}
-
-
-
-/*
-  adcStart(&ADCD1, NULL);
-  if(ADCD1.state == ADC_READY)
-  {
-    (*dtc.pstatus) |= (1 << CTRL_ADC_EN); // sets the status bit
-    adcSTM32SetCCR(ADC_CCR_TSEN); // enable temperature sensor
-    adcStartConversion(&ADCD1, &adcgrpcfg1, (adcsample_t *)sample, BUFFER_DEPTH);
-  }
-  else
-  {
-    (*dtc.perror) = (*dtc.perror) | ERROR_ADC_START;
-  }
-  return 0;
-}
-//*/
-
-/*
- * dtc_adcStop
- * wrapper for ChibiOS gpt driver function calls
- */
-int dtc_adcStop(void)
-{
-  /*
-  adcStop(&ADCD1);
-  if(ADCD1.state == ADC_STOP)
-  {
-    (*dtc.pstatus) &= ~(1 << CTRL_ADC_EN);
-  }
-  else
-  {
-    (*dtc.perror) = (*dtc.perror) | ERROR_ADC_STOP;
-  }
-  //*/
-  return 0;
-}
-
-/*
- * dtc_clearErrors
- * clears all errors
- */
-int dtc_clearErrors(void)
-{
-  (*dtc.perror) = 0;
-
-  return 0;
-}
-
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
-static int blinky(void)
-{
-  int ret;
-	bool led_state = true;
-
-	if (!gpio_is_ready_dt(&led)) 
-  {
-		return 0;
-	}
-
-	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
-	if (ret < 0) 
-  {
-		return 1;
-	}
-
-  while (1) 
-  {
-    ret = gpio_pin_toggle_dt(&led);
-    if (ret < 0) 
-    {
-      return 1;
-    }
-
-    led_state = !led_state;
-  //  printk("LED state: %s\n", led_state ? "ON" : "OFF");
-    k_msleep(SLEEP_TIME_MS);
-  }
-
-}
-
-static void blinky_entry(void *unused0, void *unused1, void *unused2)
-{
-  (void) unused0;
-  (void) unused1;
-  (void) unused2;
-
-  if(blinky())
-  {
-    printk("ERROR: blinky thread exited!");
-  }
-}
-
-K_THREAD_STACK_DEFINE(blinky_stack_area, BLINKY_STACK_SIZE);
-K_THREAD_DEFINE(
-  blinky_tid, BLINKY_STACK_SIZE,
-  blinky_entry, NULL, NULL, NULL,
-  BLINKY_PRIORITY, 0, 0
-);
-
-int startBlinkyThread(void)
-{
-  k_thread_start(blinky_tid);
 
   return 0;
 }
@@ -420,6 +320,110 @@ int dtc_adcStart(void)
 }
 
 /*
+  adcStart(&ADCD1, NULL);
+  if(ADCD1.state == ADC_READY)
+  {
+    (*dtc.pstatus) |= (1 << CTRL_ADC_EN); // sets the status bit
+    adcSTM32SetCCR(ADC_CCR_TSEN); // enable temperature sensor
+    adcStartConversion(&ADCD1, &adcgrpcfg1, (adcsample_t *)sample, BUFFER_DEPTH);
+  }
+  else
+  {
+    (*dtc.perror) = (*dtc.perror) | ERROR_ADC_START;
+  }
+  return 0;
+}
+//*/
+
+/*
+ * dtc_adcStop
+ * wrapper for ChibiOS gpt driver function calls
+ */
+int dtc_adcStop(void)
+{
+  /*
+  adcStop(&ADCD1);
+  if(ADCD1.state == ADC_STOP)
+  {
+    (*dtc.pstatus) &= ~(1 << CTRL_ADC_EN);
+  }
+  else
+  {
+    (*dtc.perror) = (*dtc.perror) | ERROR_ADC_STOP;
+  }
+  //*/
+  return 0;
+}
+
+/*
+ * dtc_clearErrors
+ * clears all errors
+ */
+int dtc_clearErrors(void)
+{
+  (*dtc.perror) = 0;
+
+  return 0;
+}
+
+static int blinky(void)
+{
+  int ret;
+	bool led_state = true;
+
+	if (!gpio_is_ready_dt(&led0)) 
+  {
+		return 0;
+	}
+
+	ret = gpio_pin_configure_dt(&led0, GPIO_OUTPUT_ACTIVE);
+	if (ret < 0) 
+  {
+		return 1;
+	}
+
+  while (1) 
+  {
+    ret = gpio_pin_toggle_dt(&led0);
+    if (ret < 0) 
+    {
+      return 1;
+    }
+
+    led_state = !led_state;
+  //  printk("LED state: %s\n", led_state ? "ON" : "OFF");
+    k_msleep(SLEEP_TIME_MS);
+  }
+
+}
+
+static void blinky_entry(void *unused0, void *unused1, void *unused2)
+{
+  (void) unused0;
+  (void) unused1;
+  (void) unused2;
+
+  if(blinky())
+  {
+    printk("ERROR: blinky thread exited!");
+  }
+}
+
+K_THREAD_STACK_DEFINE(blinky_stack_area, BLINKY_STACK_SIZE);
+K_THREAD_DEFINE(
+  blinky_tid, BLINKY_STACK_SIZE,
+  blinky_entry, NULL, NULL, NULL,
+  BLINKY_PRIORITY, 0, 0
+);
+
+int startBlinkyThread(void)
+{
+  k_thread_start(blinky_tid);
+
+  return 0;
+}
+
+/*
  * diode test card watch thread
  *
  * watches dtc OD objects and dumps them to serial output
@@ -484,9 +488,9 @@ int startWatchThread(void)
  * dtc_muxEnable
  * enables the diode mux (logic low enable)
  */
-//static const struct gpio_dt_spec mux_en = GPIO_DT_SPEC_GET(MUX_EN_NODE, gpios);
 int  dtc_muxEnable(void)
 { 
+ 	gpio_pin_set_dt(&mux_en, 0);
   //palClearPad(GPIOB, DTC_MUX_EN); // logic low enable
   (*dtc.pstatus) |= (1 << CTRL_MUX_EN);
   return 0;
@@ -498,6 +502,8 @@ int  dtc_muxEnable(void)
 int dtc_muxDisable(void)
 {
   //palSetPad(GPIOB, DTC_MUX_EN); // logic high disable
+ 	gpio_pin_set_dt(&mux_en, 1);
+  //palClearPad(GPIOB, DTC_MUX_EN); // logic low enable
   (*dtc.pstatus) &= ~(1 << CTRL_MUX_EN);
   
   return 0;
@@ -510,7 +516,13 @@ int dtc_muxDisable(void)
 int dtc_muxSelect(void)
 {
  if(*dtc.pmux_select < DTC_NUM_DIODES)
-  {
+ {
+  /*
+    gpio_port_set_masked(,
+      PAL_PORT_BIT(DTC_MUX_A0) | PAL_PORT_BIT(DTC_MUX_A1) | PAL_PORT_BIT(DTC_MUX_A2), 
+      (*dtc.pmux_select << DTC_MUX_A0)
+    );
+   //*/
     //osalSysLock();
     /*
     palWriteGroup(

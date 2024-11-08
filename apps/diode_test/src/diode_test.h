@@ -10,7 +10,11 @@
 #define ENABLE_SERIAL_DEBUG_OUTPUT        1
 
 #define LED0_NODE DT_ALIAS(led0)
-#define MUX_EN_NODE DT_ALIAS(mux_en)
+#define MUX_EN_NODE DT_ALIAS(muxen)
+#define MUX_A0_NODE DT_ALIAS(muxa0)
+#define MUX_A1_NODE DT_ALIAS(muxa1)
+#define MUX_A2_NODE DT_ALIAS(muxa2)
+#define MUX_PINS DT_ALIAS(muxpins)
 
 #define DTC_CO_NODE_ID 0x54
 
