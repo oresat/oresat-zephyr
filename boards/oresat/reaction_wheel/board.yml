@@ -1,0 +1,12 @@
+board:
+  name: reaction_wheel
+  vendor: st
+  revision:
+    format: major.minor.patch
+    default: 7.2.0
+    exact: true
+    revisions:
+      - name: 7.1.0
+      - name: 7.2.0
+  socs:
+    - name: stm32g474xx

@@ -11,6 +11,7 @@ target_sources(app PRIVATE
   src/main.c
   src/aux_adc.c
   src/pwm.c
+  src/ma702.c
   src/cube/hrtim.c
   gen/OD.c
 )

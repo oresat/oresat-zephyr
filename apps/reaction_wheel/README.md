@@ -3,7 +3,7 @@
 Compile
 
 ```bash
-west build -p always -b nucleo_g474re .
+west build -p always -b reaction_wheel .
 ```
 
 Flash
