@@ -452,7 +452,6 @@ void CO_CANmodule_process(CO_CANmodule_t *CANmodule)
 
 void CO_CANinterrupt(CO_CANmodule_t *CANmodule)
 {
-
 	/* receive interrupt */
 	if (1) {
 		CO_CANrxMsg_t *rcvMsg;     /* pointer to received message in CAN module */

@@ -60,11 +60,17 @@ int main(void)
 	aux_adc_init();
 	hrtim_pwm_start();
 
+	uint32_t loop = 0;
+	uint32_t elapsed_us = 10000;
 	while (canopennode_is_running()) {
-		timepoint = sys_timepoint_calc(K_MSEC(1000));
-		board_sensors_fill_od();
-		aux_adc_update();
+		timepoint = sys_timepoint_calc(K_USEC(elapsed_us));
+		if (loop % 10 == 0) {
+			board_sensors_fill_od();
+			aux_adc_update();
+		}
+		co_update(elapsed_us);
 		k_sleep(sys_timepoint_timeout(timepoint));
+		loop++;
 	}
 
 	hrtim_pwm_stop();

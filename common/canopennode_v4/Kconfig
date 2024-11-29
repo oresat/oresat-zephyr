@@ -9,6 +9,11 @@ config CANOPENNODE_V4
 
 if CANOPENNODE_V4
 
+config CANOPENNODE_THREADS
+	bool "CANopenNode main and rt threads"
+	help
+	  Enable CANopenNode main and rt threads
+
 config CANOPENNODE_SDO_BUFFER_SIZE
 	int "CANopen SDO buffer size"
 	default 889

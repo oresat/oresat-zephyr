@@ -36,12 +36,10 @@
 CO_t *CO = NULL;
 static CO_NMT_reset_cmd_t reset = CO_RESET_NOT;
 
+#ifdef CO_THREADS
+
 static void co_timer_handler(struct k_timer *timer);
 K_TIMER_DEFINE(co_timer, co_timer_handler, NULL);
-
-K_THREAD_STACK_ARRAY_DEFINE(co_sdo_server_stack_area, OD_CNT_SDO_SRV, CO_SDO_SRV_STACK_SIZE);
-struct k_thread co_sdo_server_threads_data[OD_CNT_SDO_SRV];
-k_tid_t co_sdo_server_tids[OD_CNT_SDO_SRV];
 
 K_THREAD_STACK_DEFINE(co_main_stack_area, CO_MAIN_STACK_SIZE);
 struct k_thread co_main_thread_data;
@@ -51,9 +49,17 @@ K_THREAD_STACK_DEFINE(co_rt_stack_area, CO_RT_STACK_SIZE);
 struct k_thread co_rt_thread_data;
 k_tid_t co_rt_tid;
 
-static void co_sdo_server_thread(void *p1, void *p2, void *p3);
 static void co_main_thread(void *p1, void *p2, void *p3);
 static void co_rt_thread(void *p1, void *p2, void *p3);
+
+#endif
+
+K_THREAD_STACK_ARRAY_DEFINE(co_sdo_server_stack_area, OD_CNT_SDO_SRV, CO_SDO_SRV_STACK_SIZE);
+struct k_thread co_sdo_server_threads_data[OD_CNT_SDO_SRV];
+k_tid_t co_sdo_server_tids[OD_CNT_SDO_SRV];
+
+static void co_sdo_server_thread(void *p1, void *p2, void *p3);
+static void co_rt_update(uint32_t elapsed_us);
 
 int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_id)
 {
@@ -141,6 +147,7 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 			K_THREAD_STACK_SIZEOF(co_sdo_server_stack_area[i]), co_sdo_server_thread,
 			&CO->SDOserver[i], NULL, NULL, CO_SDO_SRV_PRIORITY, 0, K_NO_WAIT);
 	}
+#ifdef CO_THREADS
 	co_main_tid = k_thread_create(&co_main_thread_data, co_main_stack_area,
 				      K_THREAD_STACK_SIZEOF(co_main_stack_area), co_main_thread,
 				      NULL, NULL, NULL, CO_MAIN_PRIORITY, 0, K_NO_WAIT);
@@ -149,6 +156,7 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 				    NULL, NULL, CO_RT_PRIORITY, 0, K_NO_WAIT);
 
 	k_timer_start(&co_timer, K_NO_WAIT, K_MSEC(1));
+#endif
 
 	return 0;
 }
@@ -162,8 +170,10 @@ void canopennode_stop(const struct device *dev)
 {
 	/* stop threads */
 	reset = CO_RESET_QUIT;
+#ifdef CO_THREADS
 	k_thread_join(&co_rt_thread_data, K_MSEC(1));
 	k_thread_join(&co_main_thread_data, K_MSEC(1));
+#endif
 	for (int i = 0; i < OD_CNT_SDO_SRV; i++) {
 		k_thread_resume(co_sdo_server_tids[i]);
 		k_thread_join(&co_sdo_server_threads_data[i], K_MSEC(1));
@@ -205,6 +215,27 @@ static void co_sdo_server_thread(void *p1, void *p2, void *p3)
 	CO_SDOserver_initCallbackPre(SDOserver, NULL, NULL);
 }
 
+static void co_rt_update(uint32_t elapsed_us)
+{
+	bool syncWas = false;
+
+	CO_LOCK_OD(CO->CANmodule);
+	if (!CO->nodeIdUnconfigured && CO->CANmodule->CANnormal) {
+#if (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE
+		syncWas = CO_process_SYNC(CO, elapsed_us, NULL);
+#endif
+#if (CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE
+		CO_process_RPDO(CO, syncWas, elapsed_us, NULL);
+#endif
+#if (CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE
+		CO_process_TPDO(CO, syncWas, elapsed_us, NULL);
+#endif
+	}
+	CO_UNLOCK_OD(CO->CANmodule);
+}
+
+#ifdef CO_THREADS
+
 static void co_main_thread(void *p1, void *p2, void *p3)
 {
 	ARG_UNUSED(p1);
@@ -228,31 +259,26 @@ static void co_rt_thread(void *p1, void *p2, void *p3)
 	ARG_UNUSED(p2);
 	ARG_UNUSED(p3);
 	uint32_t elapsed_us = 1000U;
-	bool syncWas;
 
 	while (reset == CO_RESET_NOT) {
 		k_sleep(K_FOREVER);
-		syncWas = false;
-
-		CO_LOCK_OD(CO->CANmodule);
-		if (!CO->nodeIdUnconfigured && CO->CANmodule->CANnormal) {
-#if (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE
-			syncWas = CO_process_SYNC(CO, elapsed_us, NULL);
-#endif
-#if (CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE
-			CO_process_RPDO(CO, syncWas, elapsed_us, NULL);
-#endif
-#if (CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE
-			CO_process_TPDO(CO, syncWas, elapsed_us, NULL);
-#endif
-		}
-		CO_UNLOCK_OD(CO->CANmodule);
+		co_rt_update(elapsed_us);
 	}
 }
 
-void co_timer_handler(struct k_timer *timer)
+static void co_timer_handler(struct k_timer *timer)
 {
 	ARG_UNUSED(timer);
 	k_thread_resume(co_main_tid);
 	k_thread_resume(co_rt_tid);
 }
+
+#else
+
+void co_update(uint32_t elapsed_us)
+{
+	reset = CO_process(CO, false, elapsed_us, NULL);
+	co_rt_update(elapsed_us);
+}
+
+#endif

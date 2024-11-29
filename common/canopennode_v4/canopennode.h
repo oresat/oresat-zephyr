@@ -13,6 +13,10 @@ int canopennode_init(const struct device *dev, uint16_t bit_rate, uint8_t node_i
 bool canopennode_is_running(void);
 void canopennode_stop(const struct device *dev);
 
+#ifndef CO_THREADS
+void co_update(uint32_t elapsed_us);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
