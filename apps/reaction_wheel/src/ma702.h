@@ -18,12 +18,12 @@ typedef struct {
 
 typedef struct {
 	uint8_t index_length_index_position: 4;
-	uint8_t pluses_per_turn;
+	uint8_t pluses_per_turn: 2;
 } ma702_abz_t;
 
 typedef struct {
-	uint8_t mglt: 2;
-	uint8_t mght: 2;
+	uint8_t mglt: 3;
+	uint8_t mght: 3;
 } ma702_mag_threadhold_t;
 
 typedef struct {
@@ -45,7 +45,7 @@ static inline uint32_t ma702_angle_raw_to_mdeg(uint16_t raw)
 
 static inline uint16_t ma702_angle_mdeg_to_raw(uint32_t millidegrees)
 {
-	return (0xFFFF) - (uint16_t)(((millidegrees / 360) * 0xFFFF) / 1000);
+	return 0xFFFF - (uint16_t)(((millidegrees / 360) * 0xFFFF) / 1000);
 }
 
 int ma702_get_angle_mdeg(const struct spi_dt_spec *spec, uint32_t *millidegrees);

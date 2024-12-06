@@ -35,20 +35,6 @@ static inline void ma702_spinlock(void)
 	}
 }
 
-int ma702_zero(const struct spi_dt_spec *spec)
-{
-	uint16_t buffer = 0;
-	const struct spi_buf buf = {
-		.buf = &buffer,
-		.len = sizeof(buffer),
-	};
-	const struct spi_buf_set buf_set = {
-		.buffers = &buf,
-		.count = 1,
-	};
-	return spi_transceive_dt(spec, &buf_set, &buf_set);
-}
-
 static bool ma702_write_reg(const struct spi_dt_spec *spec, uint8_t reg, uint8_t value)
 {
 	uint16_t tx_buffer = (((uint16_t)((0b100 << 5) | reg)) << 8) | value;
@@ -88,7 +74,7 @@ static bool ma702_write_reg(const struct spi_dt_spec *spec, uint8_t reg, uint8_t
 	return value_readback == value; // Confirm values written correctly
 }
 
-int ma702_read_reg(const struct spi_dt_spec *spec, uint8_t reg, uint16_t *value)
+static int ma702_read_reg(const struct spi_dt_spec *spec, uint8_t reg, uint16_t *value)
 {
 	uint16_t tx_buffer = ((uint16_t)((0b010 << 5) | 0x1B)) << 8;
 	const struct spi_buf tx_buf = {
@@ -130,7 +116,88 @@ int ma702_read_reg(const struct spi_dt_spec *spec, uint8_t reg, uint16_t *value)
 	return 0;
 }
 
-int ma702_get_field_strength_flags(const struct spi_dt_spec *spec, ma702_field_enum *field_strength)
+int ma702_get_angle_mdeg(const struct spi_dt_spec *spec, uint32_t *millidegrees)
+{
+	uint16_t angle;
+	int ret = ma702_read_reg(spec, MA702_REG_ZERO_POSITION, &angle);
+	if (ret == 0) {
+		*millidegrees = ma702_angle_raw_to_mdeg(angle);
+	}
+	return ret;
+}
+
+int ma702_get_bct(const struct spi_dt_spec *spec, uint8_t *bct)
+{
+	uint16_t value;
+	int ret = ma702_read_reg(spec, MA702_REG_BCT, &value);
+	if (ret == 0) {
+		*bct = (value >> 8);
+	}
+	return ret;
+}
+
+int ma702_get_trimmings(const struct spi_dt_spec *spec, ma702_trimmings_t *trimmings)
+{
+	return 0;
+	uint16_t value;
+	int ret = ma702_read_reg(spec, MA702_REG_TRIMMINGS, &value);
+	if (ret == 0) {
+		trimmings->x = (value >> 8) & 1;
+		trimmings->y = (value >> 9) & 1;
+	}
+	return ret;
+}
+
+int ma702_get_abz(const struct spi_dt_spec *spec, ma702_abz_t *abz)
+{
+	return 0;
+	uint16_t value;
+	int ret = ma702_read_reg(spec, MA702_REG_ABZ, &value);
+	if (ret == 0) {
+		abz->index_length_index_position = (value >> 10) & 0xF;
+		abz->pluses_per_turn = (value >> 14) & 0x3;
+	}
+	return ret;
+}
+
+int ma702_get_mag_thresholds(const struct spi_dt_spec *spec, ma702_mag_threadhold_t *threshholds)
+{
+	uint16_t value;
+	int ret = ma702_read_reg(spec, MA702_REG_MAG_FIELD_THRESHOLDS, &value);
+	if (ret == 0) {
+		threshholds->mglt = (value >> 13) & 0x7;
+		threshholds->mght = (value >> 10) & 0x7;
+	}
+	return ret;
+}
+
+int ma702_get_rotation_direction(const struct spi_dt_spec *spec,
+				 ma702_rotation_direction_enum *direciton)
+{
+	uint16_t value;
+	int ret = ma702_read_reg(spec, MA702_REG_ROTATION_DIRECTION, &value);
+	if (ret == 0) {
+		*direciton = (ma702_rotation_direction_enum)(value >> 15) & 0x1;
+	}
+	return ret;
+}
+
+int ma702_get_mag_flags(const struct spi_dt_spec *spec, ma702_mag_flags_t *mag_flags)
+{
+	return 0;
+	uint16_t value;
+	int ret = ma702_read_reg(spec, MA702_REG_MAG_FIELD_FLAGS, &value);
+	if (ret == 0) {
+		mag_flags->mgh = (value >> 15) & 0x1;
+		mag_flags->mgl = (value >> 14) & 0x1;
+		mag_flags->mg1l = (value >> 11) & 0x1;
+		mag_flags->mg2l = (value >> 10) & 0x1;
+	}
+	return ret;
+}
+
+static int ma702_get_field_strength_flags(const struct spi_dt_spec *spec,
+					  ma702_field_enum *field_strength)
 {
 	uint16_t field_thresh;
 	int err = ma702_read_reg(spec, MA702_REG_MAG_FIELD_FLAGS, &field_thresh);
@@ -156,19 +223,15 @@ int ma702_get_field_strength_flags(const struct spi_dt_spec *spec, ma702_field_e
 	return 0;
 }
 
-bool ma702_set_field_thresh(const struct spi_dt_spec *spec, uint8_t value)
-{
-	return ma702_write_reg(spec, MA702_REG_MAG_FIELD_THRESHOLDS, (uint16_t)value);
-}
-
 int ma702_get_field_strength_estimate_mt(const struct spi_dt_spec *spec, uint8_t *field_strength)
 {
+	int ret = 0;
 	ma702_field_enum field_strengths[FIELD_STRENGTH_ESTIMATES_COUNT] = {0};
 
 	for (uint8_t i = 0; i < FIELD_STRENGTH_ESTIMATES_COUNT; i++) {
-		// Set MGLT to i and MGHT to (7-i)
-		uint8_t threshs = (i << 5) | (i << 2); //  low and high threshholds, both 3-bits
-		if (!ma702_set_field_thresh(spec, threshs)) {
+		ma702_mag_threadhold_t mag_thres = {.mglt = i, .mght = i};
+		ret = ma702_set_mag_thresholds(spec, mag_thres);
+		if (ret != 0) {
 			goto write_fail;
 		}
 
@@ -179,22 +242,20 @@ int ma702_get_field_strength_estimate_mt(const struct spi_dt_spec *spec, uint8_t
 	}
 
 	// reset to default threshholds
-	if (!ma702_set_field_thresh(spec, DEFAULT_MGL_THRESH_REG_VAL)) {
-		goto write_fail;
-	}
-
-	return 255;
+	ma702_mag_threadhold_t mag_thres = {.mglt = 0, .mght = 0x7};
+	ret = ma702_set_mag_thresholds(spec, mag_thres);
 
 write_fail:
-	return 0;
+	return ret;
 }
 
-int ma702_get_angle_mdeg(const struct spi_dt_spec *spec, uint32_t *millidegrees)
+int ma702_set_zero_position(const struct spi_dt_spec *spec)
 {
-	uint16_t angle;
-	int ret = ma702_read_reg(spec, MA702_REG_ZERO_POSITION, &angle);
-	if (ret == 0) {
-		*millidegrees = ma702_angle_raw_to_mdeg(angle);
-	}
-	return ret;
+	return ma702_write_reg(spec, MA702_REG_ZERO_POSITION, 0);
+}
+
+int ma702_set_mag_thresholds(const struct spi_dt_spec *spec, ma702_mag_threadhold_t threshholds)
+{
+	uint16_t value = (threshholds.mglt << 13) + (threshholds.mght << 10);
+	return ma702_write_reg(spec, MA702_REG_MAG_FIELD_THRESHOLDS, value);
 }
