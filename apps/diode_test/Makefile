@@ -1,4 +1,5 @@
-BOARD= diode_test
+#BOARD= diode_test
+BOARD= nucleo_f091rc
 OPTIONS= -p always 
 BUILD_DIR= build/
 

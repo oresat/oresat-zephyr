@@ -8,8 +8,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/sys/reboot.h>
-#include <canopennode.h>
-#include <OD.h>
+#include "canopennode.h"
+#include "OD.h"
 #include "board_sensors.h"
 #include "oresat.h"
 #include "diode_test.h"
