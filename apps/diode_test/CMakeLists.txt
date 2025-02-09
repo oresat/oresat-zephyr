@@ -4,13 +4,17 @@ include(CMakePrintHelpers)
 
 cmake_minimum_required(VERSION 3.20.0)
 
-set(ORESAT_ROOT "$ENV{ZEPHYR_BASE}/../..")
-set(COMMON_SRC "${ORESAT_ROOT}/common")
-
-#cmake_print_variables(ORESAT_ROOT)
-#cmake_print_variables(COMMON_SRC)
-
-list(APPEND BOARD_ROOT ${ORESAT_ROOT}/)
+macro(app_set_runner_args)
+  board_runner_args(canopen "--node-id=${CONFIG_CANOPEN_NODE_ID}")
+  board_runner_args(stm32cubeprogrammer 
+    #"-V" 
+    #"--download-address 0x0800C000" 
+    "--port=swd" 
+    "--reset-mode=hw"
+    "-a 0x0800C000" 
+  )
+  #board_runner_args(stm32cubeprogrammer "--port=swd" "--reset-mode=hw")
+endmacro()
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 

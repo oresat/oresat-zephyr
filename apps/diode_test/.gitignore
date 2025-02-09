@@ -1,0 +1,8 @@
+# vim swap files
+*.swp
+*.swo
+*.swd
+
+# directories
+build/
+signed_build/

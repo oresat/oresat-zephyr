@@ -57,10 +57,27 @@
 	mul = <3>;
 };
 
+&flash0 {
+	partitions {
+    boot_partition: partition@0 {
+      label = "mcuboot";
+      reg = <0x00000000 0x0000C000>;
+    };
+    slot0_partition: partition@c000 {
+      label = "image-0";
+      reg = <0x0000C000 DT_SIZE_K(100)>;
+    };
+    slot1_partition: partition@25000 {
+      label = "image-1";
+      reg = <0x00025000 DT_SIZE_K(100)>;
+    };
+	};
+};
+
 &adc1 {
 	pinctrl-0 = <&adc_in0_pa0>;
 	pinctrl-names = "default";
-	st,adc-clock-source = <SYNC>;
+	st,adc-clock-source = "SYNC";
 	st,adc-prescaler = <4>;
 	status = "okay";
 	#address-cells = <1>;
@@ -87,7 +104,7 @@
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
 		zephyr,resolution = <12>;
 	};
-  channel@17 {
+  channel@11 {
 		reg = <17>;
     zephyr,gain = "ADC_GAIN_1";
 		zephyr,reference = "ADC_REF_INTERNAL";

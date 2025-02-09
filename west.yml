@@ -5,14 +5,20 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: b6aed5c
+      revision: main
       import:
         name-allowlist:
           - cmsis
           - hal_stm32
+          - mcuboot
+          - mbedtls
     - name: CANopenNode
       url: https://github.com/CANopenNode/CANopenNode
       revision: 58012aa
       path: oresat-zephyr/common/canopennode_v4/CANopenNode
     - name: oresat-configs
       url: https://github.com/oresat/oresat-configs
+    - name: mcuboot 
+      revision: main
+      url: https://github.com/mcu-tools/mcuboot
+

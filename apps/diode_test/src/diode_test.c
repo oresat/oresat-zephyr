@@ -49,9 +49,11 @@ static const struct adc_dt_spec adc_channels[] = {
 
 static const struct gpio_dt_spec led0 = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const struct gpio_dt_spec mux_en = GPIO_DT_SPEC_GET(MUX_EN_NODE, gpios);
+/*
 static const struct gpio_dt_spec mux_a0 = GPIO_DT_SPEC_GET(MUX_A0_NODE, gpios);
 static const struct gpio_dt_spec mux_a1 = GPIO_DT_SPEC_GET(MUX_A1_NODE, gpios);
 static const struct gpio_dt_spec mux_a2 = GPIO_DT_SPEC_GET(MUX_A2_NODE, gpios);
+//*/
 //static const struct device *gpio_dev = device_get_binding(MUX_PINS);
 
 /*
@@ -217,7 +219,7 @@ static enum adc_action adc_callback(
 
 const struct adc_sequence_options options = {
   .callback = adc_callback,
-  .extra_samplings = BUFFER_ARRAY_LEN - 1,
+//  .extra_samplings = BUFFER_ARRAY_LEN - 1,
 //    .interval_us = 100 * 1000UL,
   .interval_us = 0
 };
