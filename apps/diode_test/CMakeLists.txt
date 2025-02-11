@@ -4,18 +4,6 @@ include(CMakePrintHelpers)
 
 cmake_minimum_required(VERSION 3.20.0)
 
-macro(app_set_runner_args)
-  board_runner_args(canopen "--node-id=${CONFIG_CANOPEN_NODE_ID}")
-  board_runner_args(stm32cubeprogrammer 
-    #"-V" 
-    #"--download-address 0x0800C000" 
-    "--port=swd" 
-    "--reset-mode=hw"
-    "-a 0x0800C000" 
-  )
-  #board_runner_args(stm32cubeprogrammer "--port=swd" "--reset-mode=hw")
-endmacro()
-
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 set(CARD "diode_test")
@@ -36,6 +24,7 @@ zephyr_include_directories(gen)
 target_include_directories(app 
   PRIVATE 
     src/
+    #signed_build/diode_test/gen
     #    ${COMMON_SRC}/include/
 )
 
@@ -43,7 +32,21 @@ target_sources(app
   PRIVATE 
     src/main.c
     gen/OD.c
+    #signed_build/diode_test/gen/OD.c
     src/diode_test.c
     #    ${COMMON_SRC}/oresat.c
 )
+
+macro(app_set_runner_args)
+  board_runner_args(canopen "--node-id=${CONFIG_CANOPEN_NODE_ID}")
+  board_runner_args(stm32cubeprogrammer 
+    #"-V" 
+    #"--download-address 0x0800C000" 
+    "--port=swd" 
+    "--reset-mode=hw"
+    "-a 0x0800C000" 
+  )
+  #board_runner_args(stm32cubeprogrammer "--port=swd" "--reset-mode=hw")
+endmacro()
+
 
