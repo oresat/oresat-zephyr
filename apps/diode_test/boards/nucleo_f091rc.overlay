@@ -1,8 +1,5 @@
 
 / {
-	model = "OreSat Diode Test";
-	compatible = "PSAS,diode_test";
-
 	zephyr,user {
 		dac = <&dac1>;
 		dac-channel-id = <1>;
@@ -45,7 +42,31 @@
 		muxa2 = &dtc_mux_a2;
 		led0 = &orange_led_0;
 	};
+/*
+  chosen {
+    zephyr,code-partition = &slot0_partition;
+  };
+//*/
 };
+
+/*
+&flash0 {
+	partitions {
+    boot_partition: partition@0 {
+      label = "mcuboot";
+      reg = <0x00000000 0x0000C000>;
+    };
+    slot0_partition: partition@c000 {
+      label = "image-0";
+      reg = <0x0000C000 DT_SIZE_K(96)>;
+    };
+    slot1_partition: partition@24000 {
+      label = "image-1";
+      reg = <0x00024000 DT_SIZE_K(96)>;
+    };
+	};
+};
+//*/
 
 &clk_hse {
 	/delete-property/	hse-bypass;
@@ -87,7 +108,7 @@
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
 		zephyr,resolution = <12>;
 	};
-  channel@17 {
+  channel@11 {
 		reg = <17>;
     zephyr,gain = "ADC_GAIN_1";
 		zephyr,reference = "ADC_REF_INTERNAL";

@@ -10,6 +10,8 @@ manifest:
         name-allowlist:
           - cmsis
           - hal_stm32
+          - mcuboot
+          - mbedtls
     - name: CANopenNode
       url: https://github.com/CANopenNode/CANopenNode
       revision: 58012aa
