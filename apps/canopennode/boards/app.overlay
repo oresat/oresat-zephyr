@@ -1,0 +1,9 @@
+/ {
+  chosen {
+    zephyr,code-partition = &slot0_partition;
+  };
+};
+
+&can1 {
+  bitrate = <1000000>;
+};

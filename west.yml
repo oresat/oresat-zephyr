@@ -12,6 +12,7 @@ manifest:
           - hal_stm32
           - mcuboot
           - mbedtls
+          - canopennode
     - name: CANopenNode
       url: https://github.com/CANopenNode/CANopenNode
       revision: 58012aa
