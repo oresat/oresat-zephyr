@@ -79,7 +79,7 @@ pip install -r zephyr/scripts/requirements.txt
 ### Install OreSat Configs
 
 ```bash
-pip install oresat-configs>=1.0.0
+pip install --user oresat-configs~=1.0.0
 ```
 
 ### Test compile and flash
