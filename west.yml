@@ -14,5 +14,3 @@ manifest:
       url: https://github.com/CANopenNode/CANopenNode
       revision: 58012aa
       path: oresat-zephyr/common/canopennode_v4/CANopenNode
-    - name: oresat-configs
-      url: https://github.com/oresat/oresat-configs

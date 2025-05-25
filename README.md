@@ -78,14 +78,8 @@ pip install -r zephyr/scripts/requirements.txt
 
 ### Install OreSat Configs
 
-While the latest oresat-configs release can be install via `pip`,
-for development, it is better to have latest code from the git repo.
-
 ```bash
-cd oresat-configs
-pip install -r requirements.txt
-./build_and_install.sh
-cd -
+pip install --user oresat-configs~=1.0.0
 ```
 
 ### Test compile and flash
